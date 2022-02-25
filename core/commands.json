@@ -1,0 +1,46 @@
+{
+    "categories": {
+        "info": {
+            "name": "Info",
+            "description": "Rassemble les commandes qui fournissent des informations"
+        },
+        "moderation": {
+            "name": "Moderation",
+            "description": "Rassemble les commandes de modération"
+        }
+    },
+
+    "commands": {
+        "help": {
+            "usage": "help",
+            "aliases": ["h"],
+            "description": "Affiche la liste des commandes ou la page d'aide d'une seule commande",
+            "categorie": "info",
+            "args": [
+                {
+                    "name": "commande",
+                    "description": "Nom de la commande dont vous avez besoin d'aide",
+                    "required": 0
+                }
+            ]
+        },
+        "warn": {
+            "usage": "warn",
+            "aliases": [],
+            "description": "Warn un membre",
+            "categorie": "moderation",
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre que vous souhaitez avertir",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison de l'avertissement",
+                    "required": 0
+                }
+            ]
+        }
+    }
+}
