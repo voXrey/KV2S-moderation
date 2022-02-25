@@ -46,26 +46,30 @@ class Infraction:
             embed.set_author(name=self.moderator_id, icon_url=DefaultAvatar(Color.blurple))
 
         # Add infraction id
-        embed.set_footer(text=self.id)
+        embed.set_footer(text=f"Infraction {self.id}")
         
+        return embed
 
 class InfractionsManager:
     def __init__(self):
         pass
 
-    def getInfractionEmbed(self, infraction_id):
-        description=""
-
-        embed = Embed(
-            title=f"Infraction {infraction_id}",
-            description=description,
-            color=0xffffff
-        )
     def getInfraction(self, infraction_id):
-        pass
+        database = Database()
+        result = database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE infraction_id = ?',
+                            [infraction_id])
+        return Infraction(id=infraction_id,
+                                member_id=result[0],
+                                moderator_id=result[1],
+                                action=result[2],
+                                timestamp=result[3],
+                                end_timestamp=result[4],
+                                reason=result[5])
+
     def warn(self, member_id, moderator_id, timestamp, reason):
         database = Database()
         database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
                             args=[member_id, moderator_id, 'warn', timestamp, reason])
+        return database.cur.lastrowid
 
 infractions_manager = InfractionsManager()

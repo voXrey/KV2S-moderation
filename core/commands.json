@@ -41,6 +41,19 @@
                     "required": 0
                 }
             ]
+        },
+        "infraction": {
+            "usage": "infraction",
+            "aliases": ["i"],
+            "description": "Affiche les informations d'une infraction",
+            "categorie": "moderation",
+            "args": [
+                {
+                    "name": "infraction",
+                    "description": "Identifiant/numéro de l'infraction",
+                    "required": 1
+                }
+            ]
         }
     }
 }
