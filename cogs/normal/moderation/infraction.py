@@ -25,11 +25,16 @@ class Infraction(commands.Cog):
         # Get infraction
         infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
 
-        # Get infraction embed
-        embed = await infraction.getSimpleEmbed(self.bot)
+        # If infraction not exists
+        if infraction is None:
+            msg = await ctx.reply("Cette infraction n'existe pas")
+            return await msg.delete(delay=3)
 
-        # Send embed
-        await ctx.reply(embed=embed)
+        # Send embed if infraction exists
+        else:
+            # Get infraction embed
+            embed = await infraction.getSimpleEmbed(self.bot)
+            await ctx.reply(embed=embed)
 
 def setup(bot:commands.Bot):
     bot.add_cog(Infraction(bot))

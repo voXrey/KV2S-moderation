@@ -30,29 +30,36 @@ class Warn(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.member)
     async def warn(self, ctx:commands.Context, member:nextcord.Member, *, reason:str=None):
         # Check if reason is too long
-        if (reason is not None) and (len(reason) > 200): return await ctx.reply('La raison du warn ne peut excéder 200 caractères !')
+        if (reason is not None) and (len(reason) > 200):
+            msg = await ctx.reply('La raison du warn ne peut excéder 200 caractères !')
+            try: await msg.delete(delay=3)
+            except: pass
          
-        # Add warn to database
-        infraction_id = infractions_manager.warn(member_id=member.id,
-                                    moderator_id=ctx.author.id,
-                                    timestamp=time.time(),
-                                    reason=reason)
-        
-        # Send confirmation message
-        confirmation_message = await ctx.reply(embed=nextcord.Embed(description=f"✅ `Infraction #{infraction_id}` {member.mention} a été warn !", color=0xffffff))
-        
-        # Try to send message to member
-        try:
-            infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
-            embed = await infraction.getSimpleEmbed(self.bot)
-            if member.dm_channel is None:
-                await member.create_dm()
-            await member.dm_channel.send(embed=embed)
-        except Exception as e:
-            print(e)
+        else:
+            # Add warn to database
+            infraction_id = infractions_manager.warn(member_id=member.id,
+                                        moderator_id=ctx.author.id,
+                                        timestamp=time.time(),
+                                        reason=reason)
+            
+            # Send confirmation message
+            confirmation_message = await ctx.reply(embed=nextcord.Embed(description=f"✅ `Infraction #{infraction_id}` {member.mention} a été warn !", color=0xffffff))
+            # Delete confirmation message
+            try: await confirmation_message.delete(delay=1)
+            except: pass
 
-        # Delete confirmation message
-        await confirmation_message.delete(delay=0.5)
+            # Try to send message to member
+            try:
+                infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
+                embed = await infraction.getSimpleEmbed(self.bot)
+                if member.dm_channel is None:
+                    await member.create_dm()
+                await member.dm_channel.send(embed=embed)
+            except Exception as e:
+                print(e)
+
+        # Delete command
+        await ctx.message.delete()
 
 
 def setup(bot:commands.Bot):

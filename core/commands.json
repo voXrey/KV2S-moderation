@@ -67,6 +67,19 @@
                     "required": 1
                 }
             ]
+        },
+        "remove-infraction": {
+            "usage": "remove-infraction",
+            "aliases": ["ri", "clear-infraction", "ci"],
+            "description": "Supprime une infraction",
+            "categorie": "moderation",
+            "args": [
+                {
+                    "name": "infraction",
+                    "description": "L'infraction que vous souhaitez supprimer",
+                    "required": 1
+                }
+            ]
         }
     }
 }

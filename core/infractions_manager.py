@@ -62,6 +62,10 @@ class InfractionsManager:
     def __init__(self):
         pass
 
+    def deleteInfraction(self, infraction_id:int):
+        database = Database()
+        database.execute('DELETE FROM infractions WHERE infraction_id = ?', [infraction_id])
+
     def calculInfractions(self, infractions:list[Infraction]):
         result = {'warn': 0, 'mute':0, 'kick':0, 'ban':0}
         for infraction in infractions: result[infraction.action] += 1
@@ -119,15 +123,17 @@ class InfractionsManager:
         database = Database()
         result = database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE infraction_id = ?',
                                     [infraction_id])
-        return Infraction(
-            id=infraction_id,
-            member_id=result[0],
-            moderator_id=result[1],
-            action=result[2],
-            timestamp=result[3],
-            end_timestamp=result[4],
-            reason=result[5]
-        )
+        if result is not None:
+            return Infraction(
+                id=infraction_id,
+                member_id=result[0],
+                moderator_id=result[1],
+                action=result[2],
+                timestamp=result[3],
+                end_timestamp=result[4],
+                reason=result[5]
+            )
+        else: return None
 
     def getInfractions(self, member_id):
         database = Database()
