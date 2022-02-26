@@ -26,7 +26,7 @@ class Infraction(commands.Cog):
         infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
 
         # Get infraction embed
-        embed = await infraction.getEmbed(self.bot)
+        embed = await infraction.getSimpleEmbed(self.bot)
 
         # Send embed
         await ctx.reply(embed=embed)

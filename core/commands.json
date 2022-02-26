@@ -54,6 +54,19 @@
                     "required": 1
                 }
             ]
+        },
+        "infractions": {
+            "usage": "infractions",
+            "aliases": ["is"],
+            "description": "Affiche la liste des infractions d'un membre",
+            "categorie": "moderation",
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre dont vous souhaitez ses infractions",
+                    "required": 1
+                }
+            ]
         }
     }
 }
