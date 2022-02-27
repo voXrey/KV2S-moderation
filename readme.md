@@ -2,6 +2,7 @@
 ## Moderation
 ### Permissions required to use commands
 * warn -> kick members
+* kick -> kick members
 * infraction -> kick members
 * infractions -> kick members
 * edit-infraction -> kick members

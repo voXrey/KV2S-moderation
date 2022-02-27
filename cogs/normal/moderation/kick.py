@@ -16,7 +16,7 @@ with open("core/commands.json", "r") as commands_json:
     categories = data["categories"]
     commands_ = data["commands"]
 
-class Warn(commands.Cog):
+class Kick(commands.Cog):
     def __init__(self, bot:commands.Bot):
         self.bot = bot
 
@@ -65,4 +65,4 @@ class Warn(commands.Cog):
 
 
 def setup(bot:commands.Bot):
-    bot.add_cog(Warn(bot))
+    bot.add_cog(Kick(bot))
