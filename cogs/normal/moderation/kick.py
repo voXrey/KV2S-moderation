@@ -20,30 +20,30 @@ class Warn(commands.Cog):
     def __init__(self, bot:commands.Bot):
         self.bot = bot
 
-    @commands.command(name = "warn",
-                    usage=commands_['warn']['usage'],
-                    aliases=commands_['warn']['aliases'],
-                    description=commands_['warn']['description']
+    @commands.command(name = "kick",
+                    usage=commands_['kick']['usage'],
+                    aliases=commands_['kick']['aliases'],
+                    description=commands_['kick']['description']
     )
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
-    async def warn(self, ctx:commands.Context, member:nextcord.User, *, reason:str=None):
+    async def kick(self, ctx:commands.Context, member:nextcord.User, *, reason:str=None):
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
-            msg = await ctx.reply('La raison du warn ne peut excéder 200 caractères !')
+            msg = await ctx.reply('La raison du kick ne peut excéder 200 caractères !')
             try: await msg.delete(delay=3)
             except: pass
          
         else:
-            # Add warn to database
-            infraction_id = infractions_manager.warn(member_id=member.id,
+            # Add kick to database
+            infraction_id = infractions_manager.kick(member_id=member.id,
                                         moderator_id=ctx.author.id,
                                         timestamp=time.time(),
                                         reason=reason)
             
             # Send confirmation message
-            confirmation_message = await ctx.reply(embed=nextcord.Embed(description=f"✅ `Infraction #{infraction_id}` {member.mention} a été warn !", color=0xffffff))
+            confirmation_message = await ctx.reply(embed=nextcord.Embed(description=f"✅ `Infraction #{infraction_id}` {member.mention} a été kick du serveur !", color=0xffffff))
             # Delete confirmation message
             try: await confirmation_message.delete(delay=1.5)
             except: pass
@@ -56,6 +56,9 @@ class Warn(commands.Cog):
                     await member.create_dm()
                 await member.dm_channel.send(embed=embed)
             except: pass
+
+            # Kick member
+            await ctx.guild.kick(user=member, reason=reason)
 
         # Delete command
         await ctx.message.delete()

@@ -42,9 +42,27 @@
                 }
             ]
         },
+        "kick": {
+            "usage": "kick",
+            "aliases": [],
+            "description": "Kick/expulse un membre du serveur",
+            "categorie": "moderation",
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre que vous souhaitez expulser",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison de l'expulsion",
+                    "required": 0
+                }
+            ]
+        },
         "infraction": {
             "usage": "infraction",
-            "aliases": ["i"],
+            "aliases": ["i", "see-infraction", "si"],
             "description": "Affiche les informations d'une infraction",
             "categorie": "moderation",
             "args": [
@@ -78,6 +96,24 @@
                     "name": "infraction",
                     "description": "L'infraction que vous souhaitez supprimer",
                     "required": 1
+                }
+            ]
+        },
+        "edit-infraction": {
+            "usage": "edit-infraction",
+            "aliases": ["ei", "modify-infraction", "mi"],
+            "description": "Modifie une infraction",
+            "categorie": "moderation",
+            "args": [
+                {
+                    "name": "infraction",
+                    "description": "L'infraction que vous souhaitez modifier",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "La nouvelle raison de l'infraction",
+                    "required": 0
                 }
             ]
         }

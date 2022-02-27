@@ -23,7 +23,7 @@ class Infractions(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
-    async def infractions(self, ctx:commands.Context, member:nextcord.Member):
+    async def infractions(self, ctx:commands.Context, member:nextcord.User):
         # Get infractions
         infractions = infractions_manager.getInfractions(member_id=member.id)
 

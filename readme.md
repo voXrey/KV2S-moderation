@@ -4,3 +4,5 @@
 * warn -> kick members
 * infraction -> kick members
 * infractions -> kick members
+* edit-infraction -> kick members
+* remove-infraction -> kick members

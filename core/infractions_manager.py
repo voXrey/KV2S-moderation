@@ -66,6 +66,29 @@ class InfractionsManager:
         database = Database()
         database.execute('DELETE FROM infractions WHERE infraction_id = ?', [infraction_id])
 
+    def editInfraction(self, infraction:Infraction):
+        database = Database()
+        database.execute(
+            """UPDATE infractions
+                SET member_id = ?,
+                    moderator_id = ?,
+                    action = ?,
+                    timestamp = ?,
+                    end_timestamp = ?,
+                    reason = ?
+                WHERE
+                    infraction_id = ?
+            """,
+            [
+                infraction.member_id,
+                infraction.moderator_id,
+                infraction.action,
+                infraction.timestamp,
+                infraction.end_timestamp,
+                infraction.reason,
+                infraction.id
+            ])
+
     def calculInfractions(self, infractions:list[Infraction]):
         result = {'warn': 0, 'mute':0, 'kick':0, 'ban':0}
         for infraction in infractions: result[infraction.action] += 1
@@ -118,7 +141,6 @@ class InfractionsManager:
         # Return embeds list
         return embeds
 
-
     def getInfraction(self, infraction_id):
         database = Database()
         result = database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE infraction_id = ?',
@@ -158,6 +180,12 @@ class InfractionsManager:
         database = Database()
         database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
                             args=[member_id, moderator_id, 'warn', timestamp, reason])
+        return database.cur.lastrowid
+    
+    def kick(self, member_id, moderator_id, timestamp, reason):
+        database = Database()
+        database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
+                            args=[member_id, moderator_id, 'kick', timestamp, reason])
         return database.cur.lastrowid
 
 infractions_manager = InfractionsManager()
