@@ -1,6 +1,6 @@
 import datetime
-from nextcord import Color, Embed, DefaultAvatar
-import nextcord.ext.commands
+from nextcord import Embed
+from nextcord.ext import commands
 from core.database import Database
 
 class Infraction:
@@ -13,17 +13,21 @@ class Infraction:
         self.end_timestamp = end_timestamp
         self.reason = reason
 
-    async def getSimpleEmbed(self, bot:nextcord.ext.commands.Bot):
+    async def getSimpleEmbed(self, bot:commands.Bot):
         infractions_manager = InfractionsManager()
 
         description=""
 
         # Add member
-        try:
-            member = await bot.fetch_user(self.member_id)
+        if self.moderator_id == bot.user.id: # if user is the bot
+            member = bot.user 
             description+=f"**Membre:** {member} ({self.member_id})"
-        except:
-            description+=f"**Membre:** ({self.member_id})"
+        else:
+            try:
+                member = await bot.fetch_user(self.member_id)
+                description+=f"**Membre:** {member} ({self.member_id})"
+            except:
+                description+=f"**Membre:** ({self.member_id})"
 
         # Add action
         description+=f"\n**Action:** {self.action}"
@@ -46,11 +50,15 @@ class Infraction:
         )
 
         # Add moderator
-        try:
-            moderator = await bot.fetch_user(self.moderator_id)
+        if self.moderator_id == bot.user.id: # if user is the bot
+            moderator = bot.user
             embed.set_author(name=moderator, icon_url=moderator.avatar.url)
-        except:
-            embed.set_author(name=self.moderator_id, icon_url=DefaultAvatar(Color.blurple))
+        else:
+            try:
+                moderator = await bot.fetch_user(self.moderator_id)
+                embed.set_author(name=moderator, icon_url=moderator.avatar.url)
+            except:
+                embed.set_author(name=self.moderator_id, icon_url=bot.user.default_avatar.url)
 
         # Add infraction id
         embed.set_footer(text=f"Infraction #{self.id}")
@@ -94,7 +102,7 @@ class InfractionsManager:
         for infraction in infractions: result[infraction.action] += 1
         return result
 
-    async def createEmbedsWithInfractions(self, member_id, infractions:list[Infraction], bot):
+    async def createEmbedsWithInfractions(self, member_id:int, infractions:list[Infraction], bot:commands.Bot):
         embeds = [] # Embeds list
         infractions_count = len(infractions) # Number of infractions
         infractions_by_page = 8 # Number of infractions by page/embed
@@ -118,6 +126,9 @@ class InfractionsManager:
                 infractions_strings.append(f"**Infraction #{infraction.id} - {infraction.action}**\n{reason}")
                 infractions_embed_count += 1
 
+            # Add default description user avec not infraction
+            if infractions_strings == []: infractions_strings.append("Ce membre n'a aucune infraction")
+
             # Create embed
             embed = Embed(
                 description='\n\n'.join(infractions_strings),
@@ -125,11 +136,15 @@ class InfractionsManager:
             )
             
             # Add member
-            try:
-                member = await bot.fetch_user(member_id)
-                embed.set_author(name=member, icon_url=member.avatar.url)
-            except:
-                embed.set_author(name=f"({member_id})", icon_url=DefaultAvatar(Color.blurple))
+            if member_id == bot.user.id: # if user is the bot
+                member = bot.user
+                embed.set_author(name=member, icon_url=member.display_avatar.url)
+            else:
+                try:
+                    member = await bot.fetch_user(member_id)
+                    embed.set_author(name=member, icon_url=member.avatar.url)
+                except:
+                    embed.set_author(name=f"({member_id})", icon_url=bot.user.default_avatar.url)
 
             # Add total of infractions
             infractions_actions_count = self.calculInfractions(infractions=infractions)

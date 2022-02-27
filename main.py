@@ -10,7 +10,7 @@ class Bot(commands.Bot):
     def __init__(self, description=None, **options) -> None:
         #self.remove_command('help') # remove default help command to add personal help command with cogs
         self.config = self.getConfig() # set bot config
-        self.commands_info = self.getCommands() # set commands info
+        self.commands_doc = self.getCommands() # set commands doc
 
         command_prefix = commands.when_mentioned_or(self.config["PREFIX"]) # set command prefix
         intents = Intents.all() # set bot intents (all)

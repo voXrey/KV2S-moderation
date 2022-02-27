@@ -10,22 +10,20 @@ from nextcord.ext import commands
 # Set local time
 locale.setlocale(locale.LC_TIME,'')
 
-
-# Get commands.json 
-with open("core/commands.json", "r") as commands_json:
-    data = json.load(commands_json)
-    categories = data["categories"]
-    commands_ = data["commands"]
-
 class Warn(commands.Cog):
+    command_name = "warn"
+    
+    # Get commands.json 
+    with open("core/commands.json", "r") as commands_json:
+        command_info = json.load(commands_json)["commands"][command_name]
+
     def __init__(self, bot:commands.Bot):
         self.bot = bot
-        self.command_name = "warn"
 
-    @commands.command(name = "warn",
-                    usage=commands_['warn']['usage'],
-                    aliases=commands_['warn']['aliases'],
-                    description=commands_['warn']['description']
+    @commands.command(name = command_name,
+                    usage=command_info['usage'],
+                    aliases=command_info['aliases'],
+                    description=command_info['description']
     )
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)

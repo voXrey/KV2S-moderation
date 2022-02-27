@@ -5,21 +5,20 @@ from nextcord.ext import commands
 
 from core.decorators import check_permissions
 
-# Get commands.json 
-with open("core/commands.json", "r") as commands_json:
-    data = json.load(commands_json)
-    categories = data["categories"]
-    commands_ = data["commands"]
-
 class Help(commands.Cog):
+    command_name = "help"
+    
+    # Get commands.json 
+    with open("core/commands.json", "r") as commands_json:
+        command_info = json.load(commands_json)["commands"][command_name]
+
     def __init__(self, bot:commands.Bot):
         self.bot = bot
-        self.command_name = "help"
 
-    @commands.command(name = "help",
-                    usage=commands_['help']['usage'],
-                    aliases=commands_['help']['aliases'],
-                    description=commands_['help']['description']
+    @commands.command(name = command_name,
+                    usage=command_info['usage'],
+                    aliases=command_info['aliases'],
+                    description=command_info['description']
     )
     @commands.guild_only()
     @commands.cooldown(1, 1, commands.BucketType.member)
@@ -34,10 +33,10 @@ class Help(commands.Cog):
             )
 
             # Set fields (1 field by categorie)
-            for categorie, categorie_info in categories.items():
+            for categorie, categorie_info in self.bot.commands_doc["categories"].items():
                 # get commands of the current categorie
                 categorie_commands = []
-                for command,command_info in commands_.items():
+                for command,command_info in self.bot.commands_doc["commands"].items():
                     if command_info['categorie']==categorie: categorie_commands.append(command_info)
                 if len(categorie_commands) == 0: continue # no display categorie if havn't command
 
@@ -50,12 +49,12 @@ class Help(commands.Cog):
         # If user asked help for a specific command
         else:
             # If command requested no exist
-            if command_name not in commands_:
+            if command_name not in self.bot.commands_doc["commands"]:
                 await ctx.reply(f"La commande `{command_name}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
             # If command requested exists
             else:
                 # Define command's info
-                command = commands_[command_name]
+                command = self.bot.commands_doc["categories"][command_name]
 
                 # Create embed
                 embed = Embed(

@@ -5,21 +5,20 @@ from core.decorators import check_permissions
 from core.infractions_manager import infractions_manager
 from nextcord.ext import commands
 
-# Get commands.json 
-with open("core/commands.json", "r") as commands_json:
-    data = json.load(commands_json)
-    categories = data["categories"]
-    commands_ = data["commands"]
-
 class Infractions(commands.Cog):
+    command_name = "infractions"
+    
+    # Get commands.json 
+    with open("core/commands.json", "r") as commands_json:
+        command_info = json.load(commands_json)["commands"][command_name]
+
     def __init__(self, bot:commands.Bot):
         self.bot = bot
-        self.command_name = "infractions"
 
-    @commands.command(name = "infractions",
-                    usage=commands_['infractions']['usage'],
-                    aliases=commands_['infractions']['aliases'],
-                    description=commands_['infractions']['description']
+    @commands.command(name = command_name,
+                    usage=command_info['usage'],
+                    aliases=command_info['aliases'],
+                    description=command_info['description']
     )
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
