@@ -3,6 +3,8 @@ import json
 from nextcord import Embed
 from nextcord.ext import commands
 
+from core.decorators import check_permissions
+
 # Get commands.json 
 with open("core/commands.json", "r") as commands_json:
     data = json.load(commands_json)
@@ -12,6 +14,7 @@ with open("core/commands.json", "r") as commands_json:
 class Help(commands.Cog):
     def __init__(self, bot:commands.Bot):
         self.bot = bot
+        self.command_name = "help"
 
     @commands.command(name = "help",
                     usage=commands_['help']['usage'],
@@ -20,6 +23,7 @@ class Help(commands.Cog):
     )
     @commands.guild_only()
     @commands.cooldown(1, 1, commands.BucketType.member)
+    @check_permissions
     async def help(self, ctx:commands.Context, command_name:str=None):
         # If general help page (commands list) is asked by user
         if command_name is None:

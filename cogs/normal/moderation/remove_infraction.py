@@ -1,7 +1,6 @@
 import json
 
-import nextcord
-
+from core.decorators import check_permissions
 from core.infractions_manager import infractions_manager
 from nextcord.ext import commands
 
@@ -14,6 +13,7 @@ with open("core/commands.json", "r") as commands_json:
 class RemoveInfraction(commands.Cog):
     def __init__(self, bot:commands.Bot):
         self.bot = bot
+        self.command_name = "remove-infraction"
 
     @commands.command(name = "remove-infraction",
                     usage=commands_['remove-infraction']['usage'],
@@ -23,6 +23,7 @@ class RemoveInfraction(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
+    @check_permissions
     async def remove_infraction(self, ctx:commands.Context, infraction_id:int):
         # Get infraction
         infraction = infractions_manager.getInfraction(infraction_id=infraction_id)

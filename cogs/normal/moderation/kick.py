@@ -4,6 +4,7 @@ import time
 
 import nextcord
 from core.infractions_manager import infractions_manager
+from core.decorators import check_permissions
 from nextcord.ext import commands
 
 # Set local time
@@ -19,6 +20,7 @@ with open("core/commands.json", "r") as commands_json:
 class Kick(commands.Cog):
     def __init__(self, bot:commands.Bot):
         self.bot = bot
+        self.command_name = "kick"
 
     @commands.command(name = "kick",
                     usage=commands_['kick']['usage'],
@@ -28,6 +30,7 @@ class Kick(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
+    @check_permissions
     async def kick(self, ctx:commands.Context, member:nextcord.User, *, reason:str=None):
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):

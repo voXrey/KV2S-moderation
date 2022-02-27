@@ -36,7 +36,7 @@ class Bot(commands.Bot):
         Returns:
         dict: Returning commands data
         """
-        with open("/data/commands.json", "r") as commands:
+        with open("core/commands.json", "r") as commands:
             return load(commands)
 
     def load_commands(self, command_type: str) -> None:
