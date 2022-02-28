@@ -1,4 +1,5 @@
 from json import load
+import json
 from os import listdir
 from os.path import join
 
@@ -10,10 +11,13 @@ from core.infractions_manager import InfractionsManager
 
 class Bot(commands.Bot):
     def __init__(self, description=None, **options):
-        self.remove_command('help') # remove default help command to add personal help command with cogs
+        #self.remove_command('help') # remove default help command to add personal help command with cogs
         self.config = self.getConfig() # set bot config
+        self.settings = self.getSettings() # set bot settings
         self.commands_doc = self.getCommands() # set commands doc
         self.infractions_manager = InfractionsManager() # set infraction manager
+
+        self.setSetting('defaultColors', 'primary', 0xffffff)
 
         command_prefix = commands.when_mentioned_or(self.config["PREFIX"]) # set command prefix
         intents = Intents.all() # set bot intents (all)
@@ -29,8 +33,8 @@ class Bot(commands.Bot):
         Returns:
         dict: Returning config data
         """
-        with open("config.json", "r") as config:
-            return load(config)
+        with open("config.json", "r", encoding='utf-8') as config:
+            return json.load(config)
 
     def getCommands(self) -> dict:
         """
@@ -39,8 +43,33 @@ class Bot(commands.Bot):
         Returns:
         dict: Returning commands data
         """
-        with open("core/commands.json", "r") as commands:
-            return load(commands)
+        with open("core/commands.json", "r", encoding='utf-8') as commands:
+            return json.load(commands)
+
+    def getSettings(self) -> dict:
+        """
+        Get settings data
+        
+        Returns:
+        dict: Returning settings data
+        """
+        with open("data/settings.json", "r", encoding='utf-8') as settings:
+            return json.load(settings)
+    
+    def setSetting(self, setting:str, subsetting:str=None, new_data=None) -> None:
+        """
+        Set new value to a setting
+        
+        Parameters:
+        setting (str) : setting to change value
+        subseeting (str) : subsetting (setting in settings list) to change value
+        new_data (any) : new value of setting
+        """
+        data = self.getSettings()
+        with open("data/settings.json", "w", encoding='utf-8') as settings:
+            if subsetting is not None: data[setting][subsetting] = new_data
+            else: data[setting] = new_data
+            json.dump(data, settings, indent=4)
 
     def load_commands(self, command_type: str) -> None:
         """

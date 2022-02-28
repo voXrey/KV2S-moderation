@@ -29,7 +29,7 @@ class Help(commands.Cog):
             # Create embed
             embed = Embed(
                 title='Commandes',
-                color=0xffffff
+                color=self.bot.settings["defaultColors"]["primary"]
             )
 
             # Set fields (1 field by categorie)
@@ -59,7 +59,7 @@ class Help(commands.Cog):
                 # Create embed
                 embed = Embed(
                     title=f"Commande {command_name}",
-                    color=0xffffff
+                    color=self.bot.settings["defaultColors"]["primary"]
                 )
 
                 # Set args string

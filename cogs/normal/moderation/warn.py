@@ -43,7 +43,12 @@ class Warn(commands.Cog):
                                         reason=reason)
             
             # Send confirmation message
-            confirmation_message = await ctx.reply(embed=nextcord.Embed(description=f"✅ `Infraction #{infraction_id}` {member.mention} a été warn !", color=0xffffff))
+            confirmation_message = await ctx.reply(
+                embed=nextcord.Embed(
+                    description=f"✅ `Infraction #{infraction_id}` {member.mention} a été warn !",
+                    color=self.bot.settings["defaultColors"]["confirmation"]
+                    )
+                )
             # Delete confirmation message
             try: await confirmation_message.delete(delay=1.5)
             except: pass
