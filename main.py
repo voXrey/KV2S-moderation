@@ -17,14 +17,26 @@ class Bot(commands.Bot):
         self.commands_doc = self.getCommands() # set commands doc
         self.infractions_manager = InfractionsManager() # set infraction manager
 
-        self.setSetting('defaultColors', 'primary', 0xffffff)
-
-        command_prefix = commands.when_mentioned_or(self.config["PREFIX"]) # set command prefix
+        self.prefix = self.config["PREFIX"]
+        command_prefix = commands.when_mentioned_or(self.prefix) # set command prefix
         intents = Intents.all() # set bot intents (all)
 
         super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options)
 
         self.load_commands("normal") # load normal commands
+
+    def getJsonData(self, filepath:str) -> dict:
+        """
+        Get json file data
+        
+        Parameters:
+        filepath (str): file's path
+        
+        Returns:
+        dict: file's data
+        """
+        with open(filepath, "r", encoding='utf-8') as file:
+            return json.load(file)
 
     def getConfig(self) -> dict:
         """

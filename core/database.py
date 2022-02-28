@@ -11,23 +11,24 @@ def tasks(func):
         # Try to open db and execute function
         try:
             db.open()
-            func(db, *args, **kwargs)
-            pass
+            result = func(db, *args, **kwargs)
         # If an error was occured, print error and rollback db
         except Exception as e:
             print(f"An error was occured with database: {e}")
             db.connection.rollback()
+            result = e
         # Close db
         finally:
             db.close()
+            return result
     return inner
 
 class Database:
     """sqlite3 database class that holds testers jobs"""
-    DB_LOCATION = "db.sqlite3"
+    DB_LOCATION = "data/database.sqlite3"
 
     def __init__(self):
-        pass
+        self.create_table()
 
     def open(self):
         """Create database connection"""
@@ -39,10 +40,12 @@ class Database:
         self.connection.close()
 
     @tasks
-    def execute(self, sql:str, args:list=[]) -> None:
+    def execute(self, sql:str, args:list=[]) -> int:
         """execute a row of data to current cursor"""
         self.cur.execute(sql, args)
         self.connection.commit()
+        infra_id = self.cur.lastrowid
+        return infra_id
     
     @tasks
     def fetchone(self, sql:str, args:list=[]):
@@ -58,14 +61,14 @@ class Database:
 
     @tasks
     def create_table(self) -> None:
-        """create a database table if it does not exist already"""
+        """create a database table if it not exists already"""
         self.cur.execute('''CREATE TABLE IF NOT EXISTS "infractions" (
                             "infraction_id"	INTEGER NOT NULL UNIQUE,
                             "member_id"	INTEGER NOT NULL,
                             "moderator_id"	INTEGER NOT NULL,
                             "action"	TEXT NOT NULL,
                             "timestamp"	INTEGER NOT NULL,
-                            "end_timestamp"	INTEGER NOT NULL,
+                            "end_timestamp"	INTEGER,
                             "reason"	TEXT,
                             PRIMARY KEY("infraction_id" AUTOINCREMENT)
                         );''')

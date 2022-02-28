@@ -2,8 +2,9 @@ import json
 import locale
 import time
 
-import nextcord
 from core.decorators import check_permissions
+from core.infractions_manager import Infraction
+from nextcord import Embed, User
 from nextcord.ext import commands
 
 # Set local time
@@ -28,30 +29,60 @@ class Kick(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
-    async def kick(self, ctx:commands.Context, member:nextcord.User, *, reason:str=None):
+    async def kick(self, ctx:commands.Context, member:User, *, reason:str=None):
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
-            msg = await ctx.reply('La raison du kick ne peut excéder 200 caractères !')
+            try:
+                msg = await ctx.reply(embed=Embed(
+                    description='La raison du kick ne peut excéder 200 caractères !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                    )
+                )
+            except:
+                msg = await ctx.send(embed=Embed(
+                    description='La raison du kick ne peut excéder 200 caractères !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                    )
+                )
             try: await msg.delete(delay=3)
             except: pass
          
         else:
+            # Create infraction
+            infraction_without_id=Infraction(
+                id=None,
+                member_id=member.id,
+                moderator_id=ctx.author.id,
+                action='kick',
+                timestamp=time.time(),
+                reason=reason
+            )
+
             # Add kick to database
-            infraction_id = self.bot.infractions_manager.kick(member_id=member.id,
-                                        moderator_id=ctx.author.id,
-                                        timestamp=time.time(),
-                                        reason=reason)
+            infraction = self.bot.infractions_manager.addInfraction(infraction=infraction_without_id)
             
             # Send confirmation message
-            confirmation_message = await ctx.reply(embed=nextcord.Embed(description=f"✅ `Infraction #{infraction_id}` {member.mention} a été kick du serveur !", color=0xffffff))
+            try:
+                confirmation_message = await ctx.reply(
+                embed=Embed(
+                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été kick du serveur !",
+                    color=self.bot.settings["defaultColors"]["confirmation"]
+                )
+            )
+            except:
+                confirmation_message = await ctx.send(
+                embed=Embed(
+                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été kick du serveur !",
+                    color=self.bot.settings["defaultColors"]["confirmation"]
+                )
+            )
             # Delete confirmation message
             try: await confirmation_message.delete(delay=1.5)
             except: pass
 
             # Try to send message to member
             try:
-                infraction = self.bot.infractions_manager.getInfraction(infraction_id=infraction_id)
-                embed = await infraction.getSimpleEmbed(self.bot)
+                embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
                 if member.dm_channel is None:
                     await member.create_dm()
                 await member.dm_channel.send(embed=embed)

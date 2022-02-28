@@ -29,7 +29,7 @@ class Help(commands.Cog):
             # Create embed
             embed = Embed(
                 title='Commandes',
-                color=self.bot.settings["defaultColors"]["primary"]
+                color=self.bot.settings["defaultColors"]["neutral"]
             )
 
             # Set fields (1 field by categorie)
@@ -44,22 +44,24 @@ class Help(commands.Cog):
                 embed.add_field(name=categorie_info["name"], value=value, inline=False) # add field to embed
 
             # Send embed
-            await ctx.reply(embed=embed)
+            try: await ctx.reply(embed=embed)
+            except: await ctx.send(embed=embed)
 
         # If user asked help for a specific command
         else:
             # If command requested no exist
             if command_name not in self.bot.commands_doc["commands"]:
-                await ctx.reply(f"La commande `{command_name}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
+                try: await ctx.reply(f"La commande `{command_name}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
+                except: await ctx.send(f"La commande `{command_name}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
             # If command requested exists
             else:
                 # Define command's info
-                command = self.bot.commands_doc["categories"][command_name]
+                command = self.bot.commands_doc["commands"][command_name]
 
                 # Create embed
                 embed = Embed(
                     title=f"Commande {command_name}",
-                    color=self.bot.settings["defaultColors"]["primary"]
+                    color=self.bot.settings["defaultColors"]["neutral"]
                 )
 
                 # Set args string
@@ -78,7 +80,7 @@ class Help(commands.Cog):
 
                 # Create embed's field for command's arguments info
                 field_args_value = ""
-                for arg in command['args']: field_args_value += f"\n\> **{arg['name']}**: {arg['description']}"
+                for arg in command['args']: field_args_value += f"\n> **{arg['name']}**: {arg['description']}"
                 embed.add_field(
                     name='Arguments',
                     value=field_args_value,
@@ -89,7 +91,8 @@ class Help(commands.Cog):
                 embed.set_footer(text="<argument recquis> [argument falcultatif]")
 
                 # Send embed
-                await ctx.reply(embed=embed)
+                try: await ctx.reply(embed=embed)
+                except: await ctx.send(embed=embed)
 
 
 def setup(bot:commands.Bot):

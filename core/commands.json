@@ -79,7 +79,7 @@
         },
         "infractions": {
             "usage": "infractions",
-            "aliases": ["is", "userinfo"],
+            "aliases": ["is"],
             "description": "Affiche la liste des infractions d'un membre",
             "categorie": "moderation",
             "permissions": ["kick_members"],
@@ -87,6 +87,20 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez ses infractions",
+                    "required": 1
+                }
+            ]
+        },
+        "userinfo": {
+            "usage": "userinfo",
+            "aliases": ["us", "user-info"],
+            "description": "Affiche les informations d'un membre",
+            "categorie": "moderation",
+            "permissions": ["kick_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre dont vous souhaitez ses informations",
                     "required": 1
                 }
             ]

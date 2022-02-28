@@ -1,8 +1,10 @@
 {
     "defaultColors": {
-        "primary": 16777215,
-        "secondary": 16777215,
-        "tertiary": 16777215,
-        "confirmation": 16777215
-    }
+        "userinfo": 65535,
+        "sanction": 16711680,
+        "automoderation": 16744448,
+        "neutral": 33023,
+        "confirmation": 65280,
+        "error": 16711680
+    } 
 }

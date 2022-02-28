@@ -32,7 +32,8 @@ class Infractions(commands.Cog):
 
         # Send embeds
         for embed in embeds:
-            await ctx.reply(embed=embed)
+            try: await ctx.reply(embed=embed)
+            except: await ctx.send(embed=embed)
 
 def setup(bot:commands.Bot):
     bot.add_cog(Infractions(bot))

@@ -1,6 +1,7 @@
 import json
 
 from core.decorators import check_permissions
+from nextcord import Embed
 from nextcord.ext import commands
 
 class EditInfraction(commands.Cog):
@@ -28,17 +29,24 @@ class EditInfraction(commands.Cog):
 
         # If infraction not exists
         if infraction is None:
-            msg = await ctx.reply("Cette infraction n'existe pas")
+            try: msg = await ctx.reply("Cette infraction n'existe pas")
+            except: msg = await ctx.send("Cette infraction n'existe pas")
             try: await msg.delete(delay=3)
             except: pass
 
         # If infraction exists
         else:
             # Request confirmation
-            confirmation_message = await ctx.reply(
-                content="Êtes-vous sûr de vouloir modifier cette infraction ? (oui/non)",
-                embed=await infraction.getSimpleEmbed(self.bot)
-            )
+            try:
+                confirmation_message = await ctx.reply(
+                    content="Êtes-vous sûr de vouloir modifier cette infraction ? (oui/non)",
+                    embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
+                )
+            except:
+                confirmation_message = await ctx.send(
+                    content="Êtes-vous sûr de vouloir modifier cette infraction ? (oui/non)",
+                    embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
+                )
 
             ## Wait confirmation
             def check(m): return (m.channel==ctx.channel) and (m.author == ctx.author)
@@ -48,11 +56,25 @@ class EditInfraction(commands.Cog):
             if response == "oui":
                 infraction.reason = infraction_reason
                 self.bot.infractions_manager.editInfraction(infraction=infraction)
-                msg = await ctx.reply(f"L'infraction `#{infraction_id}` a été modifiée")
+                try:
+                    msg = await ctx.reply(
+                        embed=Embed(
+                            description=f"L'infraction `#{infraction_id}` a été modifiée",
+                            color=self.bot.settings["defaultColors"]["confirmation"]
+                        )
+                    )
+                except:
+                    msg = await ctx.send(
+                        embed=Embed(
+                            description=f"L'infraction `#{infraction_id}` a été modifiée",
+                            color=self.bot.settings["defaultColors"]["confirmation"]
+                        )
+                    )
                 try: await msg.delete(delay=3)
                 except: pass
             else:
-                msg = await ctx.reply("L'infraction n'a pas été modifiée")
+                try: msg = await ctx.reply("L'infraction n'a pas été modifiée")
+                except: msg = await ctx.send("L'infraction n'a pas été modifiée")
                 try: await msg.delete(delay=3)
                 except: pass
 
