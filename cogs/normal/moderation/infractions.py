@@ -2,7 +2,6 @@ import json
 
 import nextcord
 from core.decorators import check_permissions
-from core.infractions_manager import infractions_manager
 from nextcord.ext import commands
 
 class Infractions(commands.Cog):
@@ -26,10 +25,10 @@ class Infractions(commands.Cog):
     @check_permissions
     async def infractions(self, ctx:commands.Context, member:nextcord.User):
         # Get infractions
-        infractions = infractions_manager.getInfractions(member_id=member.id)
+        infractions = self.bot.infractions_manager.getInfractions(member_id=member.id)
 
         # Create infractions pages
-        embeds = await infractions_manager.createEmbedsWithInfractions(member_id=member.id, infractions=infractions, bot=self.bot)
+        embeds = await self.bot.infractions_manager.createEmbedsWithInfractions(member_id=member.id, infractions=infractions, bot=self.bot)
 
         # Send embeds
         for embed in embeds:

@@ -3,7 +3,6 @@ import locale
 import time
 
 import nextcord
-from core.infractions_manager import infractions_manager
 from core.decorators import check_permissions
 from nextcord.ext import commands
 
@@ -38,7 +37,7 @@ class Kick(commands.Cog):
          
         else:
             # Add kick to database
-            infraction_id = infractions_manager.kick(member_id=member.id,
+            infraction_id = self.bot.infractions_manager.kick(member_id=member.id,
                                         moderator_id=ctx.author.id,
                                         timestamp=time.time(),
                                         reason=reason)
@@ -51,7 +50,7 @@ class Kick(commands.Cog):
 
             # Try to send message to member
             try:
-                infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
+                infraction = self.bot.infractions_manager.getInfraction(infraction_id=infraction_id)
                 embed = await infraction.getSimpleEmbed(self.bot)
                 if member.dm_channel is None:
                     await member.create_dm()

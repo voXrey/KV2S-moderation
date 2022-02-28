@@ -1,7 +1,6 @@
 import json
 
 from core.decorators import check_permissions
-from core.infractions_manager import infractions_manager
 from nextcord.ext import commands
 
 class EditInfraction(commands.Cog):
@@ -25,7 +24,7 @@ class EditInfraction(commands.Cog):
     @check_permissions
     async def edit_infraction(self, ctx:commands.Context, infraction_id:int, *, infraction_reason:str=None):
         # Get infraction
-        infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
+        infraction = self.bot.infractions_manager.getInfraction(infraction_id=infraction_id)
 
         # If infraction not exists
         if infraction is None:
@@ -48,7 +47,7 @@ class EditInfraction(commands.Cog):
             response = message_response.content.lower()
             if response == "oui":
                 infraction.reason = infraction_reason
-                infractions_manager.editInfraction(infraction=infraction)
+                self.bot.infractions_manager.editInfraction(infraction=infraction)
                 msg = await ctx.reply(f"L'infraction `#{infraction_id}` a été modifiée")
                 try: await msg.delete(delay=3)
                 except: pass

@@ -68,15 +68,13 @@ class Infraction:
 
 class InfractionsManager:
     def __init__(self):
-        pass
+        self.database = Database()
 
     def deleteInfraction(self, infraction_id:int):
-        database = Database()
-        database.execute('DELETE FROM infractions WHERE infraction_id = ?', [infraction_id])
+        self.database.execute('DELETE FROM infractions WHERE infraction_id = ?', [infraction_id])
 
     def editInfraction(self, infraction:Infraction):
-        database = Database()
-        database.execute(
+        self.database.execute(
             """UPDATE infractions
                 SET member_id = ?,
                     moderator_id = ?,
@@ -157,8 +155,7 @@ class InfractionsManager:
         return embeds
 
     def getInfraction(self, infraction_id):
-        database = Database()
-        result = database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE infraction_id = ?',
+        result = self.database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE infraction_id = ?',
                                     [infraction_id])
         if result is not None:
             return Infraction(
@@ -173,8 +170,7 @@ class InfractionsManager:
         else: return None
 
     def getInfractions(self, member_id):
-        database = Database()
-        results = database.fetchall(
+        results = self.database.fetchall(
             'SELECT infraction_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE member_id = ?',
             [member_id]
         )
@@ -192,15 +188,11 @@ class InfractionsManager:
         ]
 
     def warn(self, member_id, moderator_id, timestamp, reason):
-        database = Database()
-        database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
+        self.database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
                             args=[member_id, moderator_id, 'warn', timestamp, reason])
-        return database.cur.lastrowid
+        return self.database.cur.lastrowid
     
     def kick(self, member_id, moderator_id, timestamp, reason):
-        database = Database()
-        database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
+        self.database.execute(sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, reason) VALUES(?, ?, ?, ?, ?)",
                             args=[member_id, moderator_id, 'kick', timestamp, reason])
-        return database.cur.lastrowid
-
-infractions_manager = InfractionsManager()
+        return self.database.cur.lastrowid

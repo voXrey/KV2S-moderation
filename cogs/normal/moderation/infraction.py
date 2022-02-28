@@ -1,6 +1,5 @@
 import json
 
-from core.infractions_manager import infractions_manager
 from nextcord.ext import commands
 
 from core.decorators import check_permissions
@@ -26,7 +25,7 @@ class Infraction(commands.Cog):
     @check_permissions
     async def infraction(self, ctx:commands.Context, infraction_id:int):
         # Get infraction
-        infraction = infractions_manager.getInfraction(infraction_id=infraction_id)
+        infraction = self.bot.infractions_manager.getInfraction(infraction_id=infraction_id)
 
         # If infraction not exists
         if infraction is None:

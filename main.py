@@ -5,12 +5,15 @@ from os.path import join
 from nextcord import Intents, Message
 from nextcord.ext import commands
 
+from core.infractions_manager import InfractionsManager
+
 
 class Bot(commands.Bot):
-    def __init__(self, description=None, **options) -> None:
-        #self.remove_command('help') # remove default help command to add personal help command with cogs
+    def __init__(self, description=None, **options):
+        self.remove_command('help') # remove default help command to add personal help command with cogs
         self.config = self.getConfig() # set bot config
         self.commands_doc = self.getCommands() # set commands doc
+        self.infractions_manager = InfractionsManager() # set infraction manager
 
         command_prefix = commands.when_mentioned_or(self.config["PREFIX"]) # set command prefix
         intents = Intents.all() # set bot intents (all)
