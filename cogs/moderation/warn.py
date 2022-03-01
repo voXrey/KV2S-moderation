@@ -1,4 +1,3 @@
-from distutils.command.build import build
 import json
 import locale
 import time
@@ -33,22 +32,16 @@ class Warn(commands.Cog):
     async def warn(self, ctx:commands.Context, member:User, *, reason:str=None):
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
-            try:
-                msg = await ctx.reply(embed=Embed(
-                description='La raison du warn ne peut excéder 200 caractères !',
-                color=self.bot.settings["defaultColors"]["error"]
+            # send warning
+            await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
+                    description='La raison du warn ne peut excéder 200 caractères !',
+                    color=self.bot.settings["defaultColors"]["error"]
                 )
             )
-            except:
-                msg = await ctx.send(embed=Embed(
-                description='La raison du warn ne peut excéder 200 caractères !',
-                color=self.bot.settings["defaultColors"]["error"]
-                )
-            )
-            try: await msg.delete(delay=3)
-            except: pass
-         
-        else:
+        
+        else: # reason is good
             # Create infraction
             infraction_without_id=Infraction(
                 id=None,
@@ -63,30 +56,23 @@ class Warn(commands.Cog):
             infraction = self.bot.infractions_manager.addInfraction(infraction=infraction_without_id)
             
             # Send confirmation message
-            try:
-                confirmation_message = await ctx.reply(
+            confirmation_message = await self.bot.replyOrSend(
+                message=ctx.message,
                 embed=Embed(
                     description=f"✅ `Infraction #{infraction.id}` {member.mention} a été warn !",
                     color=self.bot.settings["defaultColors"]["confirmation"]
-                    )
                 )
-            except:
-                confirmation_message = await ctx.send(
-                embed=Embed(
-                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été warn !",
-                    color=self.bot.settings["defaultColors"]["confirmation"]
-                    )
-                )
-            # Delete confirmation message
-            try: await confirmation_message.delete(delay=1.5)
+            )
+            try: await confirmation_message.delete(delay=2) # delete confirmation message after 2 seconds
             except: pass
 
-            # Send embeds
+            # Get warn count
             member_infractions = self.bot.infractions_manager.getInfractions(member_id=infraction.member_id)
-            count = self.bot.infractions_manager.calculInfractions(infractions=member_infractions)[infraction.action]
-            ## Try to send message to member
+            count = self.bot.infractions_manager.calculInfractions(infractions=member_infractions)['warn']
+            # Try to send an embed to member
             try:
-                builder = InfractionEmbedBuilder(infraction)
+                # build embed
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
                 builder.addAction()
                 builder.addActionCount(count)
                 builder.addReason()
@@ -94,14 +80,14 @@ class Warn(commands.Cog):
                 builder.setColor(self.bot.settings["defaultColors"]["sanction"])
                 builder.author = ctx.author
                 builder.build()
-                embed = builder.embed
+                embed = builder.embed # get embed
                 
-                if member.dm_channel is None: await member.create_dm()
-                await member.dm_channel.send(embed=embed)
-            except Exception as e:
-                print(e)
+                if member.dm_channel is None: await member.create_dm() # create dm
+                await member.dm_channel.send(embed=embed) # send embed
+            except: pass
 
-            builder = InfractionEmbedBuilder(infraction)
+            # Build embed to log infraction
+            builder = InfractionEmbedBuilder(infraction) # define embed builder
             builder.addMember(member)
             builder.addAction()
             builder.addActionCount(count)
@@ -109,10 +95,10 @@ class Warn(commands.Cog):
             builder.setColor(self.bot.settings["defaultColors"]["sanction"])
             builder.author = ctx.author
             builder.build()
-            embed = builder.embed
+            embed = builder.embed # get embed
             await self.bot.infractions_manager.logInfraction(embed) # send embed in log channel
 
-        # Delete command
+        # Try to delete command
         try: await ctx.message.delete()
         except: pass
 

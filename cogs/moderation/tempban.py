@@ -36,20 +36,13 @@ class TempBan(commands.Cog):
             
             # Check if reason is too long
             if (reason is not None) and (len(reason) > 200):
-                try:
-                    msg = await ctx.reply(embed=Embed(
+                await self.bot.replyOrSend(
+                    message=ctx.message,
+                    embed=Embed(
                         description='La raison du tempban ne peut excéder 200 caractères !',
                         color=self.bot.settings["defaultColors"]["error"]
-                        )
                     )
-                except:
-                    msg = await ctx.send(embed=Embed(
-                        description='La raison du tempban ne peut excéder 200 caractères !',
-                        color=self.bot.settings["defaultColors"]["error"]
-                        )
-                    )
-                try: await msg.delete(delay=3)
-                except: pass
+                )
             
             else:
                 duration_timestamp = self.bot.infractions_manager.timestampFromDuration(duration)
@@ -70,22 +63,14 @@ class TempBan(commands.Cog):
                 infraction = self.bot.infractions_manager.addInfraction(infraction=infraction_without_id)
                 
                 # Send confirmation message
-                try:
-                    confirmation_message = await ctx.reply(
+                confirmation_message = await self.bot.replyOrSend(
+                    message=ctx.message,
                     embed=Embed(
                         description=f"✅ `Infraction #{infraction.id}` {member.mention} a été temporairement ban du serveur (jusqu'au {datetime.fromtimestamp(end_timestamp).strftime('%d/%m/%Y')}) !",
                         color=self.bot.settings["defaultColors"]["confirmation"]
                     )
                 )
-                except:
-                    confirmation_message = await ctx.send(
-                    embed=Embed(
-                        description=f"✅ `Infraction #{infraction.id}` {member.mention} a été temporairement ban du serveur (jusqu'au {datetime.fromtimestamp(end_timestamp).strftime('%d/%m/%Y')}) !",
-                        color=self.bot.settings["defaultColors"]["confirmation"]
-                    )
-                )
-                # Delete confirmation message
-                try: await confirmation_message.delete(delay=1.5)
+                try: await confirmation_message.delete(delay=2) # Delete confirmation message after 2 seconds
                 except: pass
 
                 # Send embeds
@@ -93,20 +78,21 @@ class TempBan(commands.Cog):
                 count = self.bot.infractions_manager.calculInfractions(infractions=member_infractions)["ban"]
                 ## Try to send message to member
                 try:
-                    builder = InfractionEmbedBuilder(infraction)
+                    builder = InfractionEmbedBuilder(infraction) # define embed builder
                     builder.addAction()
                     builder.addActionCount(count)
                     builder.addReason()
                     builder.setColor(self.bot.settings["defaultColors"]["sanction"])
                     builder.author = ctx.author
                     builder.build()
-                    embed = builder.embed
+                    embed = builder.embed # get embed
                     
-                    if member.dm_channel is None: await member.create_dm()
-                    await member.dm_channel.send(embed=embed)
+                    if member.dm_channel is None: await member.create_dm() # create dm with member
+                    await member.dm_channel.send(embed=embed) # send embed to member
                 except: pass
 
-                builder = InfractionEmbedBuilder(infraction)
+                # Build embed to send in log channels
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
                 builder.addMember(member)
                 builder.addAction()
                 builder.addActionCount(count)
@@ -114,30 +100,31 @@ class TempBan(commands.Cog):
                 builder.setColor(self.bot.settings["defaultColors"]["sanction"])
                 builder.author = ctx.author
                 builder.build()
-                embed = builder.embed
+                embed = builder.embed # get embed
                 await self.bot.infractions_manager.logInfraction(embed) # send embed in log channel
 
                 # Ban member
                 await ctx.guild.ban(user=member, reason=reason)
         else:
-            await ctx.send(
-            embed=Embed(
-                description=f"""La durée fournie n'est pas valide !
-                                Voici comment fournir une durée valide: [nombre][lettre]
-                                `s` : secondes
-                                `m` : minutes
-                                `h` : heures
-                                `j` et `d` : jours
-                                `M` : mois
-                                `a` et `y` : années
-                                """,
-                color=self.bot.settings["defaultColors"]["error"]
-                ).set_footer(text="Seuls les mois et les minutes sont sensibles aux majuscules")
+            await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
+                    description=f"""La durée fournie n'est pas valide !
+                                    Voici comment fournir une durée valide: [nombre][lettre]
+                                    `s` : secondes
+                                    `m` : minutes
+                                    `h` : heures
+                                    `j` et `d` : jours
+                                    `M` : mois
+                                    `a` et `y` : années
+                                    """,
+                    color=self.bot.settings["defaultColors"]["error"]
+                )
+                .set_footer(text="Seuls les mois et les minutes sont sensibles aux majuscules")
             )
 
         # Delete command
         await ctx.message.delete()
-
 
 def setup(bot:commands.Bot):
     bot.add_cog(TempBan(bot))

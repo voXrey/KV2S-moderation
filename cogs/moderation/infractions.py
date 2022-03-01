@@ -24,7 +24,7 @@ class Infractions(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
     async def infractions(self, ctx:commands.Context, member:nextcord.User=None):
-        # Set member
+        # use author as member if member is not given
         if member is None: member = ctx.author
         
         # Get infractions
@@ -34,9 +34,10 @@ class Infractions(commands.Cog):
         embeds = await self.bot.infractions_manager.createEmbedsWithInfractions(member_id=member.id, infractions=infractions, bot=self.bot)
 
         # Send embeds
-        for embed in embeds:
-            try: await ctx.reply(embed=embed)
-            except: await ctx.send(embed=embed)
+        await self.bot.replyOrSend(
+                message=ctx.message,
+                embeds=embeds
+        )
 
 def setup(bot:commands.Bot):
     bot.add_cog(Infractions(bot))

@@ -44,8 +44,7 @@ class Help(commands.Cog):
                 embed.add_field(name=categorie_info["name"], value=value, inline=False) # add field to embed
 
             # Send embed
-            try: await ctx.reply(embed=embed)
-            except: await ctx.send(embed=embed)
+            await self.bot.replyOrSend(message=ctx.message, embed=embed)
 
         # If user asked help for a specific command
         else:
@@ -91,8 +90,7 @@ class Help(commands.Cog):
                 embed.set_footer(text="<argument recquis> [argument falcultatif]")
 
                 # Send embed
-                try: await ctx.reply(embed=embed)
-                except: await ctx.send(embed=embed)
+                await self.bot.replyOrSend(message=ctx.message, embed=embed)
 
 
 def setup(bot:commands.Bot):

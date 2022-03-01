@@ -30,29 +30,25 @@ class UnBan(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
     async def unban(self, ctx:commands.Context, member:User, *, reason:str=None):
-        # Check if member is banned
+        # Check if member is banned with a try
         try:
             await ctx.guild.fetch_ban(member)
-            # member is banned
+            # member is banned (no error)
             
             # Check if reason is too long
             if (reason is not None) and (len(reason) > 200):
-                try:
-                    msg = await ctx.reply(embed=Embed(
+                msg = await self.bot.replyOrSend(
+                    message=ctx.message,
+                    embed=Embed(
                         description='La raison de l\'unban ne peut excéder 200 caractères !',
                         color=self.bot.settings["defaultColors"]["error"]
-                        )
                     )
-                except:
-                    msg = await ctx.send(embed=Embed(
-                        description='La raison de l\'unban ne peut excéder 200 caractères !',
-                        color=self.bot.settings["defaultColors"]["error"]
-                        )
-                    )
-                try: await msg.delete(delay=3)
-                except: pass
-            
-            else:
+                )
+
+            else: # reason is good
+                # Unban user
+                await ctx.guild.unban(member)
+
                 # Create infraction
                 infraction_without_id=Infraction(
                     id=None,
@@ -67,57 +63,41 @@ class UnBan(commands.Cog):
                 infraction = self.bot.infractions_manager.addInfraction(infraction=infraction_without_id)
                 
                 # Send confirmation message
-                try:
-                    confirmation_message = await ctx.reply(
+                confirmation_message = await self.bot.replyOrSend(
+                    message=ctx.message,
                     embed=Embed(
                         description=f"✅ `Infraction #{infraction.id}` {member.mention} a été unban du serveur !",
                         color=self.bot.settings["defaultColors"]["confirmation"]
                     )
                 )
-                except:
-                    confirmation_message = await ctx.send(
-                    embed=Embed(
-                        description=f"✅ `Infraction #{infraction.id}` {member.mention} a été unban du serveur !",
-                        color=self.bot.settings["defaultColors"]["confirmation"]
-                    )
-                )
-                # Delete confirmation message
-                try: await confirmation_message.delete(delay=1.5)
+                try: await confirmation_message.delete(delay=2) # Delete confirmation message after 2 seconds
                 except: pass
 
-                # Send embed in log channel
-                builder = InfractionEmbedBuilder(infraction)
+                # Build embed to send in log channel
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
                 builder.addMember(member)
                 builder.addAction()
                 builder.addReason()
-                builder.setColor(self.bot.settings["defaultColors"]["cancel-sanction"])
+                builder.setColor(self.bot.settings["defaultColors"]["cancel"])
                 builder.author = ctx.author
                 builder.build()
-                embed = builder.embed
-                await self.bot.infractions_manager.logInfraction(embed)
+                embed = builder.embed # get embed
+                await self.bot.infractions_manager.logInfraction(embed) # send embed in log channel
 
-                # Unban user
-                await ctx.guild.unban(member)
         except:
             # member is not banned
-            try:
-                msg = await ctx.reply(embed=Embed(
+            msg = await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
                     description='Cet utilisateur n\'est pas banni du serveur !',
                     color=self.bot.settings["defaultColors"]["error"]
                     )
-                )
-            except:
-                msg = await ctx.send(embed=Embed(
-                    description='Cet utilisateur n\'est pas banni du serveur !',
-                    color=self.bot.settings["defaultColors"]["error"]
-                    )
-                )
-            try: await msg.delete(delay=3)
+            )
+            try: await msg.delete(delay=3) # delete msg after 3 seconds
             except: pass
 
         # Delete command
         await ctx.message.delete()
-
 
 def setup(bot:commands.Bot):
     bot.add_cog(UnBan(bot))

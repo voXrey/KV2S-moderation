@@ -1,7 +1,9 @@
 import json
 
 from core.decorators import check_permissions
-from nextcord import Embed
+from core.infractions_manager import InfractionEmbedBuilder
+from nextcord import Embed, ButtonStyle, Interaction
+from nextcord.ui import View, Button
 from nextcord.ext import commands
 
 class EditInfraction(commands.Cog):
@@ -29,61 +31,91 @@ class EditInfraction(commands.Cog):
 
         # If infraction not exists
         if infraction is None:
-            try: msg = await ctx.reply("Cette infraction n'existe pas")
-            except: msg = await ctx.send("Cette infraction n'existe pas")
-            try: await msg.delete(delay=3)
+            # send warning
+            msg = await self.bot.replyorSend(
+                message=ctx.message,
+                content="Cette infraction n'existe pas"
+            )
+            try: await msg.delete(delay=3) # try to send warning after 3 seconds
             except: pass
 
         # If infraction exists
         else:
-            # Request confirmation
-            try:
-                confirmation_message = await ctx.reply(
-                    content="Êtes-vous sûr de vouloir modifier cette infraction ? (oui/non)",
-                    embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
-                )
-            except:
-                confirmation_message = await ctx.send(
-                    content="Êtes-vous sûr de vouloir modifier cette infraction ? (oui/non)",
-                    embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
-                )
+            # Requiest confirmation
+            ## Build embed
+            builder = InfractionEmbedBuilder(infraction) # define embed builder
+            builder.addMember(await self.bot.fetch_user(infraction.member_id))
+            builder.addAction()
+            builder.addReason()
+            builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+            builder.author = await self.bot.fetch_user(infraction.moderator_id)
+            builder.build()
+            embed = builder.embed # get embed
 
-            ## Wait confirmation
-            def check(m): return (m.channel==ctx.channel) and (m.author == ctx.author)
-            message_response = await self.bot.wait_for('message', check=check, timeout=120) # wait confirmation message
-            
-            response = message_response.content.lower()
-            if response == "oui":
-                infraction.reason = infraction_reason
-                self.bot.infractions_manager.editInfraction(infraction=infraction)
-                try:
-                    msg = await ctx.reply(
+            ## Create buttons
+            ### create yes button
+            yes_button = Button(
+                style=ButtonStyle.green,
+                label="oui",
+                custom_id="edit_infraction"
+            )
+            async def yes_callback(interaction:Interaction):
+                """Edit infraction"""
+                if interaction.user == ctx.author._user:
+                    try: await interaction.message.delete() # delete first message
+                    except: pass
+                    infraction.reason = infraction_reason
+                    self.bot.infractions_manager.editInfraction(infraction=infraction)
+                    msg = await self.bot.replyOrSend(
+                        message=ctx.message,
                         embed=Embed(
-                            description=f"L'infraction `#{infraction_id}` a été modifiée",
-                            color=self.bot.settings["defaultColors"]["confirmation"]
+                        description=f"L'infraction `#{infraction_id}` a été modifié",
+                        color=self.bot.settings["defaultColors"]["confirmation"]
                         )
                     )
-                except:
-                    msg = await ctx.send(
+                    try: await msg.delete(delay=3) # delete msg after 3 seconds
+                    except: pass
+            yes_button.callback = yes_callback
+
+            ### create no button
+            no_button = Button(
+                style=ButtonStyle.red,
+                label="non",
+                custom_id="no_edit_infraction"
+            )
+            async def no_callback(interaction:Interaction):
+                """No edit infraction"""
+                if interaction.user == ctx.author._user:
+                    try: await interaction.message.delete() # delete first message
+                    except: pass
+                    msg = await self.bot.replyOrSend(
+                        message=ctx.message,
                         embed=Embed(
-                            description=f"L'infraction `#{infraction_id}` a été modifiée",
-                            color=self.bot.settings["defaultColors"]["confirmation"]
+                        description=f"L'infraction `#{infraction_id}` n'a pas été supprimée",
+                        color=self.bot.settings["defaultColors"]["cancel"]
                         )
                     )
-                try: await msg.delete(delay=3)
-                except: pass
-            else:
-                try: msg = await ctx.reply("L'infraction n'a pas été modifiée")
-                except: msg = await ctx.send("L'infraction n'a pas été modifiée")
-                try: await msg.delete(delay=3)
-                except: pass
+                    try: await msg.delete(delay=3) # delete msg after 3 seconds
+                    except: pass
+            no_button.callback = no_callback
+
+            ## create view to stock buttons
+            view = View(timeout=120)
+            view.add_item(yes_button)
+            view.add_item(no_button)
+
+            ## send embed
+            confirmation_message = await self.bot.replyOrSend(
+                message=ctx.message,
+                content="Êtes-vous sûr de vouloir modifier cette infraction ?",
+                embed = embed,
+                view=view
+            )
 
             # Delete messages
-            try: await ctx.message.delete()
+            try: await ctx.message.delete() # delete command
             except: pass
-            try: await confirmation_message.delete()
-            except: pass
-            try: await message_response.delete()
+            try: await confirmation_message.delete(delay=120) # delete after 120 seconds (after message's view timeout)
             except: pass
 
 

@@ -25,16 +25,16 @@ class UserPerms(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
     async def userperms(self, ctx:commands.Context, member:Member=None):
-        # Set member
+        # If member is not given use author
         if member is None: member = ctx.author
         
         # Create list of member's permissions
-        permissions_info = self.bot.getJsonData('core/roles_info.json') # get permissions info
+        permissions_info = self.bot.getJsonData('core/perms_info.json') # get permissions info
         member_permissions = [permission[0] for permission in member.guild_permissions if permission[1]] # get member permissions
-        permissions = [permissions_info['traductions'][permission] for permission in member_permissions] # traduct permissions
+        permissions = [permissions_info['traductions'][permission] for permission in member_permissions] # traduce permissions to french
 
-        if 'administrator' in member_permissions: permissions_string = permissions_info['traductions']['administrator'] # resume permissions
-        else: permissions_string = '\n'.join(permissions)
+        if 'administrator' in member_permissions: permissions_string = permissions_info['traductions']['administrator'] # resume permissions for administrators
+        else: permissions_string = '\n'.join(permissions) # create str
 
         # Create embed
         embed = Embed(
@@ -42,21 +42,17 @@ class UserPerms(commands.Cog):
             color=self.bot.settings["defaultColors"]["userinfo"]
         )
 
-        ## Set author who is the member
+        # Set author (member)
         embed.set_author(
             name=member,
             icon_url=member.display_avatar.url
         )
 
         # Send embed
-        try:
-            await ctx.reply(
-                embed=embed
-            )
-        except:
-            await ctx.send(
-                embed=embed
-            )
+        await self.bot.replyOrSend(
+            message=ctx.message,
+            embed=embed
+        )
 
 def setup(bot:commands.Bot):
     bot.add_cog(UserPerms(bot))

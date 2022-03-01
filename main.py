@@ -3,7 +3,8 @@ import json
 from os import listdir
 from os.path import join
 
-from nextcord import Intents, Message
+from nextcord import Embed, Intents, Message, Message
+from nextcord.ui import View
 from nextcord.ext import commands
 
 from core.infractions_manager import InfractionsManager
@@ -24,6 +25,37 @@ class Bot(commands.Bot):
         super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options) # init commands.Bot
 
         self.load_commands() # load commands
+
+    async def replyOrSend(self, message:Message, content:str=None, embed:Embed=None, embeds:list[Embed]=None, view:View=None):
+        """
+        Try to reply to message, if an error is occured, try to send a message in the message's channels
+        
+        Parameters:
+        message (Message): message to reply
+        content (str): message content to send
+        embeds (list[Embed]): message embeds to send
+        view (View): message's view
+        
+        Returns:
+        Message: message sent
+        """
+        try: # try to reply
+            msg = await message.reply(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                view=view
+            )
+        except: # if reply didn't worked
+            try: # try to send message in the message's channel
+                msg = await message.channel.send(
+                    content=content,
+                    embed=embed,
+                    embeds=embeds,
+                    view=view
+                )
+            except: return
+        return msg
 
     def getJsonData(self, filepath:str) -> dict:
         """

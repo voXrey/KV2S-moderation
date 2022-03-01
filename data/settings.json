@@ -2,7 +2,7 @@
     "defaultColors": {
         "userinfo": 65535,
         "sanction": 16711680,
-        "cancel-sanction": 16711680,
+        "cancel": 16711680,
         "automoderation": 16744448,
         "neutral": 33023,
         "confirmation": 65280,

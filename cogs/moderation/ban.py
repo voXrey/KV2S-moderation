@@ -32,20 +32,14 @@ class Ban(commands.Cog):
     async def ban(self, ctx:commands.Context, member:User, *, reason:str=None):
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
-            try:
-                msg = await ctx.reply(embed=Embed(
+            # Send warning
+            msg = await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
                     description='La raison du ban ne peut excéder 200 caractères !',
                     color=self.bot.settings["defaultColors"]["error"]
-                    )
                 )
-            except:
-                msg = await ctx.send(embed=Embed(
-                    description='La raison du ban ne peut excéder 200 caractères !',
-                    color=self.bot.settings["defaultColors"]["error"]
-                    )
-                )
-            try: await msg.delete(delay=3)
-            except: pass
+            )
         
         else:
             # Create infraction
@@ -62,40 +56,33 @@ class Ban(commands.Cog):
             infraction = self.bot.infractions_manager.addInfraction(infraction=infraction_without_id)
             
             # Send confirmation message
-            try:
-                confirmation_message = await ctx.reply(
+            confirmation_message = await self.bot.replyOrSend(
+                message=ctx.message,
                 embed=Embed(
                     description=f"✅ `Infraction #{infraction.id}` {member.mention} a été ban du serveur !",
                     color=self.bot.settings["defaultColors"]["confirmation"]
                 )
             )
-            except:
-                confirmation_message = await ctx.send(
-                embed=Embed(
-                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été ban du serveur !",
-                    color=self.bot.settings["defaultColors"]["confirmation"]
-                )
-            )
-            # Delete confirmation message
-            try: await confirmation_message.delete(delay=1.5)
+            try: await confirmation_message.delete(delay=2) # Delete confirmation message after 2 seconds
             except: pass
 
-            # Send embeds
+            # Get action counts
             member_infractions = self.bot.infractions_manager.getInfractions(member_id=infraction.member_id)
-            count = self.bot.infractions_manager.calculInfractions(infractions=member_infractions)[infraction.action]
-            ## Try to send message to member
+            count = self.bot.infractions_manager.calculInfractions(infractions=member_infractions)['ban']
+            # Try to send embed to member
             try:
-                builder = InfractionEmbedBuilder(infraction)
+                # Build embed
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
                 builder.addAction()
                 builder.addActionCount(count)
                 builder.addReason()
                 builder.setColor(self.bot.settings["defaultColors"]["sanction"])
                 builder.author = ctx.author
                 builder.build()
-                embed = builder.embed
+                embed = builder.embed # get embed
                 
-                if member.dm_channel is None: await member.create_dm()
-                await member.dm_channel.send(embed=embed)
+                if member.dm_channel is None: await member.create_dm() # create dm
+                await member.dm_channel.send(embed=embed) # send dm
             except: pass
 
             builder = InfractionEmbedBuilder(infraction)
