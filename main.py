@@ -23,7 +23,7 @@ class Bot(commands.Bot):
 
         super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options)
 
-        self.load_commands("normal") # load normal commands
+        self.load_commands() # load commands
 
     def getJsonData(self, filepath:str) -> dict:
         """
@@ -83,20 +83,17 @@ class Bot(commands.Bot):
             else: data[setting] = new_data
             json.dump(data, settings, indent=4)
 
-    def load_commands(self, command_type: str) -> None:
+    def load_commands(self) -> None:
         """
         Load normal or slash commands
-        
-        Parameters:
-        command_type (str) : Type of commands to load (normal/slash)
         """
-        for command_categorie in listdir(f"./cogs/{command_type}"): # for each commands categorie in normal/slash commands
-            for file in listdir(join(f"./cogs/{command_type}", command_categorie)): # for each file in command categorie
+        for command_categorie in listdir(f"./cogs"): # for each commands categorie
+            for file in listdir(f"./cogs/{command_categorie}"): # for each file in command categorie
                 # check if file is a python file
                 if file.endswith(".py"):
                     extension = file[:-3]
                     try: # try to load extension/command
-                        self.load_extension(f"cogs.{command_type}.{command_categorie}.{extension}")
+                        self.load_extension(f"cogs.{command_categorie}.{extension}")
                         print(f"Loaded command '{extension}'")
                     except Exception as e:
                         exception = f"{type(e).__name__}: {e}"
