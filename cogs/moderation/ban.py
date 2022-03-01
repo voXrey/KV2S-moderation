@@ -1,4 +1,3 @@
-from distutils.command.build import build
 import json
 import locale
 import time
@@ -11,8 +10,8 @@ from nextcord.ext import commands
 # Set local time
 locale.setlocale(locale.LC_TIME,'')
 
-class Warn(commands.Cog):
-    command_name = "warn"
+class Ban(commands.Cog):
+    command_name = "ban"
     
     # Get commands.json 
     with open("core/commands.json", "r") as commands_json:
@@ -27,56 +26,56 @@ class Warn(commands.Cog):
                     description=command_info['description']
     )
     @commands.guild_only()
-    @commands.has_permissions(kick_members=True)
+    @commands.has_permissions(ban_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
-    async def warn(self, ctx:commands.Context, member:User, *, reason:str=None):
+    async def ban(self, ctx:commands.Context, member:User, *, reason:str=None):
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
             try:
                 msg = await ctx.reply(embed=Embed(
-                description='La raison du warn ne peut excéder 200 caractères !',
-                color=self.bot.settings["defaultColors"]["error"]
+                    description='La raison du ban ne peut excéder 200 caractères !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                    )
                 )
-            )
             except:
                 msg = await ctx.send(embed=Embed(
-                description='La raison du warn ne peut excéder 200 caractères !',
-                color=self.bot.settings["defaultColors"]["error"]
+                    description='La raison du ban ne peut excéder 200 caractères !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                    )
                 )
-            )
             try: await msg.delete(delay=3)
             except: pass
-         
+        
         else:
             # Create infraction
             infraction_without_id=Infraction(
                 id=None,
                 member_id=member.id,
                 moderator_id=ctx.author.id,
-                action='warn',
+                action='ban',
                 timestamp=time.time(),
                 reason=reason
             )
 
-            # Add warn to database
+            # Add ban to database
             infraction = self.bot.infractions_manager.addInfraction(infraction=infraction_without_id)
             
             # Send confirmation message
             try:
                 confirmation_message = await ctx.reply(
                 embed=Embed(
-                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été warn !",
+                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été ban du serveur !",
                     color=self.bot.settings["defaultColors"]["confirmation"]
-                    )
                 )
+            )
             except:
                 confirmation_message = await ctx.send(
                 embed=Embed(
-                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été warn !",
+                    description=f"✅ `Infraction #{infraction.id}` {member.mention} a été ban du serveur !",
                     color=self.bot.settings["defaultColors"]["confirmation"]
-                    )
                 )
+            )
             # Delete confirmation message
             try: await confirmation_message.delete(delay=1.5)
             except: pass
@@ -90,7 +89,6 @@ class Warn(commands.Cog):
                 builder.addAction()
                 builder.addActionCount(count)
                 builder.addReason()
-                builder.addWarning(self.bot.settings['automoderation']['warns-for-ban'])
                 builder.setColor(self.bot.settings["defaultColors"]["sanction"])
                 builder.author = ctx.author
                 builder.build()
@@ -98,8 +96,7 @@ class Warn(commands.Cog):
                 
                 if member.dm_channel is None: await member.create_dm()
                 await member.dm_channel.send(embed=embed)
-            except Exception as e:
-                print(e)
+            except: pass
 
             builder = InfractionEmbedBuilder(infraction)
             builder.addMember(member)
@@ -112,9 +109,12 @@ class Warn(commands.Cog):
             embed = builder.embed
             await self.bot.infractions_manager.logInfraction(embed) # send embed in log channel
 
+            # Ban member
+            await ctx.guild.ban(user=member, reason=reason)
+
         # Delete command
-        try: await ctx.message.delete()
-        except: pass
+        await ctx.message.delete()
+
 
 def setup(bot:commands.Bot):
-    bot.add_cog(Warn(bot))
+    bot.add_cog(Ban(bot))

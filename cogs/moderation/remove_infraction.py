@@ -3,6 +3,7 @@ import json
 from core.decorators import check_permissions
 from nextcord import Embed
 from nextcord.ext import commands
+from core.infractions_manager import InfractionEmbedBuilder
 
 class RemoveInfraction(commands.Cog):
     command_name = "remove-infraction"
@@ -37,15 +38,24 @@ class RemoveInfraction(commands.Cog):
         # If infraction exists
         else:
             # Request confirmation
+            ## Get infraction embed
+            builder = InfractionEmbedBuilder(infraction)
+            builder.addMember(await self.bot.fetch_user(infraction.member_id))
+            builder.addAction()
+            builder.addReason()
+            builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+            builder.author = await self.bot.fetch_user(infraction.moderator_id)
+            builder.build()
+            embed = builder.embed
             try:
                 confirmation_message = await ctx.reply(
                 content="Êtes-vous sûr de vouloir supprimer cette infraction ? (oui/non)",
-                embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
+                embed = embed
             )
             except:
                 confirmation_message = await ctx.send(
                 content="Êtes-vous sûr de vouloir supprimer cette infraction ? (oui/non)",
-                embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
+                embed = embed
             )
 
             ## Wait confirmation

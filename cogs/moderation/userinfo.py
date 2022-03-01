@@ -24,7 +24,10 @@ class UserInfo(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
-    async def userinfo(self, ctx:commands.Context, member:Member):
+    async def userinfo(self, ctx:commands.Context, member:Member=None):
+        # Set member
+        if member is None: member = ctx.author
+
         # Get infractions and counts
         infractions = self.bot.infractions_manager.getInfractions(member_id=member.id)
         counts = self.bot.infractions_manager.calculInfractions(infractions)
@@ -59,23 +62,11 @@ class UserInfo(commands.Cog):
             name="A créé son compte",
             value=member.created_at.strftime("Le %A %d %B %Y")
         )
-        ## Add list of member's permissions
-        permissions_info = self.bot.getJsonData('core/roles_info.json') # get permissions info
-        member_permissions = [permission[0] for permission in member.guild_permissions if permission[1]] # get member permissions
-        permissions = [permissions_info['traductions'][permission] for permission in member_permissions] # traduct permissions
-
-        if 'administrator' in member_permissions: permissions_string = permissions_info['traductions']['administrator'] # resume permissions
-        else: permissions_string = '\n'.join(permissions)
-
-        embed.add_field(
-            name="Permissions",
-            value=permissions_string
-        )
 
         ## Set author who is the member
         embed.set_author(
             name=f"{member} ({member.id})",
-            icon_url=member.avatar.url
+            icon_url=member.display_avatar.url
         )
 
         ## Set footer (counts)
@@ -84,19 +75,31 @@ class UserInfo(commands.Cog):
             text="Infractions: "+' | '.join(footer_counts_strings)
         )
 
-        # Create view's button
-        button = Button(
+        # Create view's buttons
+        infra_button = Button(
             style=ButtonStyle.secondary,
             label="Voir les infractions",
             custom_id="send_infractions"
         )
-        async def callback(interaction:Interaction):
+        async def infra_callback(interaction:Interaction):
             if interaction.user == ctx.author._user:
                 await ctx.invoke(self.bot.get_command('infractions'), member)
+        infra_button.callback = infra_callback
 
-        button.callback = callback
+        id_button = Button(
+            style=ButtonStyle.secondary,
+            label="id",
+            custom_id="send_id"
+        )
+        async def id_callback(interaction:Interaction):
+            if interaction.user == ctx.author._user:
+                try: await ctx.reply(member.id)
+                except: await ctx.send(member.id)
+        id_button.callback = id_callback
+
         view = View()
-        view.add_item(button)
+        view.add_item(infra_button)
+        view.add_item(id_button)
 
         # Send embed
         try:

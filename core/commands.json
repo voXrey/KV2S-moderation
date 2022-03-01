@@ -63,6 +63,68 @@
                 }
             ]
         },
+        "ban": {
+            "usage": "ban",
+            "aliases": [],
+            "description": "Ban un membre du serveur",
+            "categorie": "moderation",
+            "permissions": ["ban_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre que vous souhaitez bannir",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison du ban",
+                    "required": 0
+                }
+            ]
+        },
+        "tempban": {
+            "usage": "tempban",
+            "aliases": [],
+            "description": "Ban temporairement un membre du serveur",
+            "categorie": "moderation",
+            "permissions": ["ban_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre que vous souhaitez bannir",
+                    "required": 1
+                },
+                {
+                    "name": "durée",
+                    "description": "Durée du bannissment\n`s` : secondes\n`m` : minutes\n`h` : heures\n`j` et `d` : jours\n`M` : mois\n`a` et `y` : années",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison du ban",
+                    "required": 0
+                }
+            ]
+        },
+        "unban": {
+            "usage": "unban",
+            "aliases": [],
+            "description": "Annule le bannissment un membre du serveur",
+            "categorie": "moderation",
+            "permissions": ["ban_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre dont vous souhaitez supprimer le bannissment",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison de l'unban",
+                    "required": 0
+                }
+            ]
+        },
         "infraction": {
             "usage": "infraction",
             "aliases": ["i", "see-infraction", "si"],
@@ -86,22 +148,36 @@
             "args": [
                 {
                     "name": "membre",
-                    "description": "Membre dont vous souhaitez ses infractions",
-                    "required": 1
+                    "description": "Membre dont vous souhaitez ses infractions (vous si membre n'est pas donné)",
+                    "required": 0
                 }
             ]
         },
         "userinfo": {
             "usage": "userinfo",
-            "aliases": ["us", "user-info"],
+            "aliases": ["ui", "user-info"],
             "description": "Affiche les informations d'un membre",
             "categorie": "moderation",
             "permissions": ["kick_members"],
             "args": [
                 {
                     "name": "membre",
-                    "description": "Membre dont vous souhaitez ses informations",
-                    "required": 1
+                    "description": "Membre dont vous souhaitez ses informations (vous si membre n'est pas donné)",
+                    "required": 0
+                }
+            ]
+        },
+        "userperms": {
+            "usage": "userperms",
+            "aliases": ["up", "user-perms"],
+            "description": "Affiche les permissions d'un membre",
+            "categorie": "moderation",
+            "permissions": ["kick_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre dont vous souhaitez voir les permissions (vous si membre n'est pas donné)",
+                    "required": 0
                 }
             ]
         },

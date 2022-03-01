@@ -3,6 +3,7 @@ import json
 from nextcord.ext import commands
 
 from core.decorators import check_permissions
+from core.infractions_manager import InfractionEmbedBuilder
 
 class Infraction(commands.Cog):
     command_name = "infraction"
@@ -36,7 +37,15 @@ class Infraction(commands.Cog):
         # Send embed if infraction exists
         else:
             # Get infraction embed
-            embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
+            builder = InfractionEmbedBuilder(infraction)
+            builder.addMember(await self.bot.fetch_user(infraction.member_id))
+            builder.addAction()
+            builder.addReason()
+            builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+            builder.author = await self.bot.fetch_user(infraction.moderator_id)
+            builder.build()
+            embed = builder.embed
+            
             try: await ctx.reply(embed=embed)
             except: await ctx.send(embed=embed)
 

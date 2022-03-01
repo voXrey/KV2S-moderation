@@ -23,7 +23,10 @@ class Infractions(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
-    async def infractions(self, ctx:commands.Context, member:nextcord.User):
+    async def infractions(self, ctx:commands.Context, member:nextcord.User=None):
+        # Set member
+        if member is None: member = ctx.author
+        
         # Get infractions
         infractions = self.bot.infractions_manager.getInfractions(member_id=member.id)
 

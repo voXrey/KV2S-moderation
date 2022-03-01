@@ -15,13 +15,13 @@ class Bot(commands.Bot):
         self.config = self.getConfig() # set bot config
         self.settings = self.getSettings() # set bot settings
         self.commands_doc = self.getCommands() # set commands doc
-        self.infractions_manager = InfractionsManager() # set infraction manager
+        self.infractions_manager = InfractionsManager(bot=self) # set infraction manager
 
         self.prefix = self.config["PREFIX"]
         command_prefix = commands.when_mentioned_or(self.prefix) # set command prefix
         intents = Intents.all() # set bot intents (all)
 
-        super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options)
+        super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options) # init commands.Bot
 
         self.load_commands() # load commands
 
@@ -103,6 +103,11 @@ class Bot(commands.Bot):
         """
         The code in this even is executed when the bot is ready
         """
+        # get mychannels
+        self.mychannels = {}
+        for channel_name,channel_id in self.settings['channels'].items():
+            if channel_id is not None: self.mychannels[channel_name] = await self.fetch_channel(channel_id)
+
         print(f"Logged in as {bot.user}")
         print("-------------------")
 

@@ -3,7 +3,7 @@ import locale
 import time
 
 from core.decorators import check_permissions
-from core.infractions_manager import Infraction
+from core.infractions_manager import Infraction, InfractionEmbedBuilder
 from nextcord import Embed, User
 from nextcord.ext import commands
 
@@ -80,13 +80,34 @@ class Kick(commands.Cog):
             try: await confirmation_message.delete(delay=1.5)
             except: pass
 
-            # Try to send message to member
+            # Send embeds
+            member_infractions = self.bot.infractions_manager.getInfractions(member_id=infraction.member_id)
+            count = self.bot.infractions_manager.calculInfractions(infractions=member_infractions)[infraction.action]
+            ## Try to send message to member
             try:
-                embed = await self.bot.infractions_manager.createInfractionEmbed(self.bot, infraction)
-                if member.dm_channel is None:
-                    await member.create_dm()
+                builder = InfractionEmbedBuilder(infraction)
+                builder.addAction()
+                builder.addActionCount(count)
+                builder.addReason()
+                builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+                builder.author = ctx.author
+                builder.build()
+                embed = builder.embed
+                
+                if member.dm_channel is None: await member.create_dm()
                 await member.dm_channel.send(embed=embed)
             except: pass
+
+            builder = InfractionEmbedBuilder(infraction)
+            builder.addMember(member)
+            builder.addAction()
+            builder.addActionCount(count)
+            builder.addReason()
+            builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+            builder.author = ctx.author
+            builder.build()
+            embed = builder.embed
+            await self.bot.infractions_manager.logInfraction(embed) # send embed in log channel
 
             # Kick member
             await ctx.guild.kick(user=member, reason=reason)
