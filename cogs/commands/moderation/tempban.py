@@ -34,6 +34,21 @@ class TempBan(commands.Cog):
         # Check duration
         if (duration is not None) and (len(duration) > 1) and (duration[-1] in self.bot.settings["letters-duration"]) and (duration[:-1].isnumeric()):
             
+            # Check if member is banned
+            try:
+                await ctx.guild.fetch_ban(member)
+                # no error : member is not banned
+            except:
+                # member is already benned
+                await self.bot.replyOrSend(
+                    message=ctx.message,
+                    embed=Embed(
+                        description='Ce membre est déjà banni !',
+                        color=self.bot.settings["defaultColors"]["error"]
+                    )
+                )
+                return # to stop command
+            
             # Check if reason is too long
             if (reason is not None) and (len(reason) > 200):
                 await self.bot.replyOrSend(

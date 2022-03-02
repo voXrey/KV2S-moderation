@@ -30,10 +30,25 @@ class Ban(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
     async def ban(self, ctx:commands.Context, member:User, *, reason:str=None):
+        # Check if member is banned
+        try:
+            await ctx.guild.fetch_ban(member)
+            # no error : member is not banned
+        except:
+            # member is already benned
+            await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
+                    description='Ce membre est déjà banni !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                )
+            )
+            return # to stop command
+            
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
             # Send warning
-            msg = await self.bot.replyOrSend(
+            await self.bot.replyOrSend(
                 message=ctx.message,
                 embed=Embed(
                     description='La raison du ban ne peut excéder 200 caractères !',
