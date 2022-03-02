@@ -24,8 +24,6 @@ class Bot(commands.Bot):
 
         super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options) # init commands.Bot
 
-        self.load_commands() # load commands
-
     async def replyOrSend(self, message:Message, content:str=None, embed:Embed=None, embeds:list[Embed]=None, view:View=None):
         """
         Try to reply to message, if an error is occured, try to send a message in the message's channels
@@ -119,17 +117,32 @@ class Bot(commands.Bot):
         """
         Load normal or slash commands
         """
-        for command_categorie in listdir(f"./cogs"): # for each commands categorie
-            for file in listdir(f"./cogs/{command_categorie}"): # for each file in command categorie
+        for command_categorie in listdir(f"./cogs/commands"): # for each commands categorie
+            for file in listdir(f"./cogs/commands/{command_categorie}"): # for each file in command categorie
                 # check if file is a python file
                 if file.endswith(".py"):
                     extension = file[:-3]
                     try: # try to load extension/command
-                        self.load_extension(f"cogs.{command_categorie}.{extension}")
+                        self.load_extension(f"cogs.commands.{command_categorie}.{extension}")
                         print(f"Loaded command '{extension}'")
                     except Exception as e:
                         exception = f"{type(e).__name__}: {e}"
                         print(f"Failed to load command {extension}\n{exception}")
+    
+    def load_tasks(self) -> None:
+        """
+        Load tasks
+        """
+        for file in listdir(f"./cogs/tasks"): # for each file in tasks folder
+            # check if file is a python file
+            if file.endswith(".py"):
+                extension = file[:-3]
+                try: # try to load extension/tasks
+                    self.load_extension(f"cogs.tasks.{extension}")
+                    print(f"Loaded tasks '{extension}'")
+                except Exception as e:
+                    exception = f"{type(e).__name__}: {e}"
+                    print(f"Failed to load tasks {extension}\n{exception}")
 
     async def on_ready(self) -> None:
         """
@@ -139,6 +152,9 @@ class Bot(commands.Bot):
         self.mychannels = {}
         for channel_name,channel_id in self.settings['channels'].items():
             if channel_id is not None: self.mychannels[channel_name] = await self.fetch_channel(channel_id)
+
+        self.load_commands() # load commands
+        self.load_tasks() # load tasks
 
         print(f"Logged in as {bot.user}")
         print("-------------------")

@@ -2,6 +2,7 @@ import json
 import locale
 import time
 
+from core.helpers import letterToFrenchWord
 from core.decorators import check_permissions
 from core.infractions_manager import Infraction, InfractionEmbedBuilder
 from nextcord import Embed, User
@@ -37,9 +38,7 @@ class TempBan(commands.Cog):
             # Check if member is banned
             try:
                 await ctx.guild.fetch_ban(member)
-                # no error : member is not banned
-            except:
-                # member is already benned
+                # no error : member is already banned
                 await self.bot.replyOrSend(
                     message=ctx.message,
                     embed=Embed(
@@ -48,6 +47,9 @@ class TempBan(commands.Cog):
                     )
                 )
                 return # to stop command
+            except:
+                # member is not banned
+                pass # continue command
             
             # Check if reason is too long
             if (reason is not None) and (len(reason) > 200):
@@ -68,9 +70,10 @@ class TempBan(commands.Cog):
                     id=None,
                     member_id=member.id,
                     moderator_id=ctx.author.id,
-                    action='tempban',
+                    action='ban',
                     timestamp=time.time(),
                     end_timestamp=end_timestamp,
+                    duration_string=duration,
                     reason=reason
                 )
 
@@ -81,7 +84,7 @@ class TempBan(commands.Cog):
                 confirmation_message = await self.bot.replyOrSend(
                     message=ctx.message,
                     embed=Embed(
-                        description=f"✅ `Infraction #{infraction.id}` {member.mention} a été temporairement ban du serveur (jusqu'au {datetime.fromtimestamp(end_timestamp).strftime('%d/%m/%Y')}) !",
+                        description=f"✅ `Infraction #{infraction.id}` {member.mention} a été banni du serveur pour **{duration[:-1]} {letterToFrenchWord(letter=duration[-1], number=int(duration[:-1]))}** !",
                         color=self.bot.settings["defaultColors"]["confirmation"]
                     )
                 )
@@ -95,6 +98,7 @@ class TempBan(commands.Cog):
                 try:
                     builder = InfractionEmbedBuilder(infraction) # define embed builder
                     builder.addAction()
+                    builder.addDurationString()
                     builder.addActionCount(count)
                     builder.addReason()
                     builder.setColor(self.bot.settings["defaultColors"]["sanction"])
@@ -110,6 +114,7 @@ class TempBan(commands.Cog):
                 builder = InfractionEmbedBuilder(infraction) # define embed builder
                 builder.addMember(member)
                 builder.addAction()
+                builder.addDurationString()
                 builder.addActionCount(count)
                 builder.addReason()
                 builder.setColor(self.bot.settings["defaultColors"]["sanction"])

@@ -33,9 +33,7 @@ class Ban(commands.Cog):
         # Check if member is banned
         try:
             await ctx.guild.fetch_ban(member)
-            # no error : member is not banned
-        except:
-            # member is already benned
+            # no error : member is already banned
             await self.bot.replyOrSend(
                 message=ctx.message,
                 embed=Embed(
@@ -44,6 +42,9 @@ class Ban(commands.Cog):
                 )
             )
             return # to stop command
+        except:
+            # member is not banned
+            pass # continue command
             
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):

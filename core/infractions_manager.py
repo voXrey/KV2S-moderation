@@ -1,16 +1,19 @@
 import datetime
+import time
+from core.helpers import letterToFrenchWord
 from nextcord import Embed, Member, User
 from nextcord.ext import commands
 from core.database import Database
 
 class Infraction:
-    def __init__(self, id:int, member_id:int, moderator_id:int, action:str, timestamp:int, end_timestamp:int=None, reason:str=None):
+    def __init__(self, id:int, member_id:int, moderator_id:int, action:str, timestamp:int, end_timestamp:int=None, duration_string=None, reason:str=None):
         self.id = id
         self.member_id = member_id
         self.moderator_id = moderator_id
         self.action = action
         self.timestamp = timestamp
         self.end_timestamp = end_timestamp
+        self.duration_string = duration_string
         self.reason = reason
 
 class InfractionEmbedBuilder:
@@ -34,14 +37,14 @@ class InfractionEmbedBuilder:
         """
         Add action to embed description
         """
-        self.description.append(f"**Action**: {self.infraction.action}")
+        self.description.append(f"**Action:** {self.infraction.action}")
     
     def addMember(self, member:User=None):
         """
         Add member to embed description
         """
-        if member is not None: self.description.append(f"**Membre**: {member} ({member.id})")
-        else: self.description.append(f"**Membre**: ({self.infraction.member_id})")
+        if member is not None: self.description.append(f"**Membre:** {member} ({member.id})")
+        else: self.description.append(f"**Membre:** ({self.infraction.member_id})")
 
     def addActionCount(self, action_count:int):
         """
@@ -54,6 +57,17 @@ class InfractionEmbedBuilder:
         Add warning to advert how many warns are required to be banned
         """
         self.description.append(f"**Attention** Vous serez banni après {warnsforban_count} warns !")
+
+    def addDurationString(self):
+        """
+        Add duration of infraction if is a temporary infraction
+        """
+        duration_string = self.infraction.duration_string
+        letter = duration_string[-1]
+        number = int(duration_string[:-1])
+        if duration_string is not None:
+            word = letterToFrenchWord(letter, number)
+            self.description.append(f"**Durée:** `{number} {word}`")
 
     def setColor(self, color:int):
         """
@@ -218,7 +232,7 @@ class InfractionsManager:
         Infraction: infraction with this id
         None: if infraction not exists
         """
-        result = self.database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE infraction_id = ?',
+        result = self.database.fetchone('SELECT member_id, moderator_id, action, timestamp, end_timestamp, duration_string, reason FROM infractions WHERE infraction_id = ?',
                                     [infraction_id])
         if result is not None:
             return Infraction(
@@ -228,7 +242,8 @@ class InfractionsManager:
                 action=result[2],
                 timestamp=result[3],
                 end_timestamp=result[4],
-                reason=result[5]
+                duration_string=result[5],
+                reason=result[6]
             )
         else: return None
 
@@ -243,7 +258,7 @@ class InfractionsManager:
         list[Infraction]: list of member's infractions
         """
         results = self.database.fetchall(
-            'SELECT infraction_id, moderator_id, action, timestamp, end_timestamp, reason FROM infractions WHERE member_id = ?',
+            'SELECT infraction_id, moderator_id, action, timestamp, end_timestamp, duration_string, reason FROM infractions WHERE member_id = ?',
             [member_id]
         )
         return [
@@ -254,7 +269,8 @@ class InfractionsManager:
                 action=result[2],
                 timestamp=result[3],
                 end_timestamp=result[4],
-                reason=result[5]
+                duration_string=result[5],
+                reason=result[6]
             )
             for result in results
         ]
@@ -269,6 +285,11 @@ class InfractionsManager:
         Returns:
         Infraction: new infraction with id
         """
+        if infraction.action in ['ban', 'mute', 'unban', 'unmute']:
+            member_infractions = self.getInfractions(infraction.member_id)
+            for member_infraction in member_infractions:
+                self.endInfraction(member_infraction.id)
+
         infraction_id = self.database.execute(
             sql="INSERT INTO infractions(member_id, moderator_id, action, timestamp, end_timestamp, reason) VALUES(?, ?, ?, ?, ?, ?)",
             args=[
@@ -295,3 +316,46 @@ class InfractionsManager:
         n = int(duration[:-1])
 
         return n*self.bot.settings["letters-duration"][letter]
+
+    def endInfraction(self, infraction_id):
+        self.database.execute(
+            """UPDATE infractions
+                SET ended = 1
+                WHERE
+                    infraction_id = ?
+            """,
+            args=[infraction_id]
+        )
+
+    def membersToUnban(self):
+        """
+        Get list of members to unban who are in db
+        
+        Returns:
+        list[int]: list of members'id to unban
+        """
+        # Get all last bans (no ended) where duration is finished (end_timestamp < time.time())
+        results = self.database.fetchall(
+            sql="""SELECT infraction_id, member_id FROM infractions
+                        WHERE
+                            action = ?
+                            AND ended = ?
+                            AND end_timestamp < ?
+                """,
+            args=[
+                'ban',
+                0,
+                time.time()
+            ]
+        )
+
+        # Create dict to stock members to unban
+        members = {}
+        for result in results:
+            infraction_id = result[0]
+            member_id = result[1]
+            
+            members[member_id] = infraction_id # add to dict
+            self.endInfraction(infraction_id) # end infraction
+
+        return members

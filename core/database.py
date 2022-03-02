@@ -69,6 +69,8 @@ class Database:
                             "action"	TEXT NOT NULL,
                             "timestamp"	INTEGER NOT NULL,
                             "end_timestamp"	INTEGER,
+                            "duration_string" TEXT,
+                            "ended" INTEGER NOT NULL DEFAULT 0,
                             "reason"	TEXT,
                             PRIMARY KEY("infraction_id" AUTOINCREMENT)
                         );''')
