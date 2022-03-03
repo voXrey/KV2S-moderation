@@ -359,3 +359,36 @@ class InfractionsManager:
             self.endInfraction(infraction_id) # end infraction
 
         return members
+    
+    def membersTounMute(self):
+        """
+        Get list of members to unmute who are in db
+        
+        Returns:
+        list[int]: list of members'id to unmute
+        """
+        # Get all last mutes (no ended) where duration is finished (end_timestamp < time.time())
+        results = self.database.fetchall(
+            sql="""SELECT infraction_id, member_id FROM infractions
+                        WHERE
+                            action = ?
+                            AND ended = ?
+                            AND end_timestamp < ?
+                """,
+            args=[
+                'mute',
+                0,
+                time.time()
+            ]
+        )
+
+        # Create dict to stock members to unban
+        members = {}
+        for result in results:
+            infraction_id = result[0]
+            member_id = result[1]
+            
+            members[member_id] = infraction_id # add to dict
+            self.endInfraction(infraction_id) # end infraction
+
+        return members

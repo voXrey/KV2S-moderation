@@ -30,5 +30,6 @@
         "y": 31536000,
         "Y": 31536000
     },
-    "moderation-update-time": 1
+    "moderation-update-time": 1,
+    "moderation-muted-role": 948604823970926603
 }
