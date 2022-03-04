@@ -63,6 +63,68 @@
                 }
             ]
         },
+        "mute": {
+            "usage": "mute",
+            "aliases": [],
+            "description": "mute/rend muet un membre du serveur",
+            "categorie": "moderation",
+            "permissions": ["mute_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre que vous souhaitez mute",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison du mute",
+                    "required": 0
+                }
+            ]
+        },
+        "tempmute": {
+            "usage": "tempmute",
+            "aliases": [],
+            "description": "tempmute/rend muet temporairement un membre du serveur",
+            "categorie": "moderation",
+            "permissions": ["mute_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre que vous souhaitez tempmute",
+                    "required": 1
+                },
+                {
+                    "name": "durée",
+                    "description": "Durée du mute\n`s` : secondes\n`m` : minutes\n`h` : heures\n`j` et `d` : jours\n`M` : mois\n`a` et `y` : années",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison du tempmute",
+                    "required": 0
+                }
+            ]
+        },
+        "unmute": {
+            "usage": "unmute",
+            "aliases": [],
+            "description": "Annule le mute un membre du serveur",
+            "categorie": "moderation",
+            "permissions": ["mute_members"],
+            "args": [
+                {
+                    "name": "membre",
+                    "description": "Membre dont vous souhaitez annuler le mute",
+                    "required": 1
+                },
+                {
+                    "name": "raison",
+                    "description": "Raison de l'unmute",
+                    "required": 0
+                }
+            ]
+        },
         "ban": {
             "usage": "ban",
             "aliases": [],
@@ -115,7 +177,7 @@
             "args": [
                 {
                     "name": "membre",
-                    "description": "Membre dont vous souhaitez supprimer le bannissment",
+                    "description": "Membre dont vous souhaitez annuler le bannissment",
                     "required": 1
                 },
                 {

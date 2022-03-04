@@ -360,7 +360,7 @@ class InfractionsManager:
 
         return members
     
-    def membersTounMute(self):
+    def membersToUnmute(self):
         """
         Get list of members to unmute who are in db
         

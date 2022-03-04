@@ -43,7 +43,7 @@ class CheckMuted(Cog):
                             description=f"`{member}` a été unmute (Infraction `#{members[member_id]}`)",
                             color=self.bot.settings["defaultColors"]["cancel"]
                         )
-                            .set_author(name=self.bot.member, icon_url=self.bot.member.display_avatar.url)
+                            .set_author(name=self.bot.user, icon_url=self.bot.user.display_avatar.url)
                     )
                 except Exception as e:
                     print(e)
