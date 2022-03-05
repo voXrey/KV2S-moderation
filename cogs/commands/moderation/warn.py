@@ -2,6 +2,8 @@ import json
 import locale
 import time
 
+import nextcord
+
 from core.decorators import check_permissions
 from core.infractions_manager import Infraction, InfractionEmbedBuilder
 from nextcord import Embed, User
@@ -30,6 +32,38 @@ class Warn(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
     async def warn(self, ctx:commands.Context, member:User, *, reason:str=None):
+        member_ = await ctx.guild.fetch_member(member.id)
+        # check if member is banned
+        try:
+            await ctx.guild.fetch_ban(member_)
+            # no error : is banned
+
+            await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
+                    description='un membre banni ne peut pas être warn !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                )
+            )
+            return # stop command
+        except:
+            # error : is not banned
+            # continue command
+            pass
+
+        # check if member is muted
+        muted_role_id = self.bot.settings["moderation-muted-role"]
+        muted_role = nextcord.utils.find(lambda r: r.id == muted_role_id, ctx.guild.roles)
+        if muted_role in member_.roles:
+            await self.bot.replyOrSend(
+                message=ctx.message,
+                embed=Embed(
+                    description='un membre mute ne peut pas être warn !',
+                    color=self.bot.settings["defaultColors"]["error"]
+                )
+            )
+            return # stop command
+
         # Check if reason is too long
         if (reason is not None) and (len(reason) > 200):
             # send warning
@@ -76,7 +110,7 @@ class Warn(commands.Cog):
                 builder.addAction()
                 builder.addActionCount(count)
                 builder.addReason()
-                builder.addWarning(self.bot.settings['automoderation']['warns-for-ban'])
+                builder.addWarning(self.bot.settings['automoderation']['warns-for-sanction'])
                 builder.setColor(self.bot.settings["defaultColors"]["sanction"])
                 builder.author = ctx.author
                 builder.build()
@@ -98,6 +132,9 @@ class Warn(commands.Cog):
             embed = builder.embed # get embed
             await self.bot.infractions_manager.logInfraction(embed) # send embed in log channel
 
+        # check if member must be banned/muted
+        await self.bot.infractions_manager.checkWarnsForSanction(member.id)
+        
         # Try to delete command
         try: await ctx.message.delete()
         except: pass

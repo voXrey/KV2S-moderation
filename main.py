@@ -2,11 +2,12 @@ from json import load
 import json
 from os import listdir
 from os.path import join
+from discord import Member
 
-from nextcord import Embed, Intents, Message, Message
+from nextcord import Embed, Intents, Message, Message, Interaction
 from nextcord.ui import View
 from nextcord.ext import commands
-
+from nextcord.ext.commands import Bot
 from core.infractions_manager import InfractionsManager
 
 
@@ -164,9 +165,20 @@ class Bot(commands.Bot):
         The code in this event is executed every time someone sends a message, with or without the prefix
         :param message: The message that was sent.
         """
-        if message.author == bot.user or message.author.bot: return
-        await bot.process_commands(message)
+        if message.author == self.user or message.author.bot: return
+        await self.process_commands(message)
     
+    """async def on_interaction(self, interaction:nextcord.Interaction):
+        if interaction.type == nextcord.InteractionType.application_command:
+            await self.process_application_commands(interaction)"""
+
+
+
 if __name__ == "__main__":
     bot = Bot() # create bot
+
+    @bot.slash_command(name="help", description="Help slash command !", guild_ids=[914554436926447636])
+    async def pingtest(interaction:Interaction, *, text=None):
+        await interaction.send(text)
+
     bot.run(bot.config["TOKEN"]) # run bot with the token in bot config

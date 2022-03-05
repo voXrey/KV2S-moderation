@@ -1,9 +1,12 @@
 import datetime
 import time
+
+import nextcord
 from core.helpers import letterToFrenchWord
 from nextcord import Embed, Member, User
 from nextcord.ext import commands
 from core.database import Database
+from core.helpers import letterToFrenchWord
 
 class Infraction:
     def __init__(self, id:int, member_id:int, moderator_id:int, action:str, timestamp:int, end_timestamp:int=None, duration_string=None, reason:str=None):
@@ -56,7 +59,7 @@ class InfractionEmbedBuilder:
         """
         Add warning to advert how many warns are required to be banned
         """
-        self.description.append(f"**Attention** Vous serez banni après {warnsforban_count} warns !")
+        self.description.append(f"**Attention** Vous serez sanctionné après 3, 5 et 10 warns !")
 
     def addDurationString(self):
         """
@@ -392,3 +395,164 @@ class InfractionsManager:
             self.endInfraction(infraction_id) # end infraction
 
         return members
+    
+    async def checkWarnsForSanction(self, member_id):
+        # get member's infractions
+        member_infractions = self.getInfractions(member_id=member_id)
+        counts = self.calculInfractions(infractions=member_infractions)
+        warn_count = counts['warn']
+
+        # create default infractionn
+        default_infraction = Infraction(
+            id=None,
+            member_id=member_id,
+            moderator_id=self.bot.user.id,
+            action=None,
+            timestamp=time.time(),
+            end_timestamp=None,
+            duration_string=None,
+            reason=None
+        )
+
+        # get guild and member
+        guild = await self.bot.fetch_guild(self.bot.settings["guild_id"])
+        member = await guild.fetch_member(member_id)
+        
+        # test if member must to be muted/banned
+        if warn_count == 1:
+            duration_string = "2j"
+            default_infraction.action = "mute"
+            default_infraction.duration_string = duration_string
+            default_infraction. end_timestamp = self.timestampFromDuration(duration_string) + default_infraction.timestamp
+            default_infraction.reason = "Mute automatique 2 jours après 3 warns"
+            
+            # add infraction
+            infraction = self.addInfraction(infraction=default_infraction)
+
+            # check if member is in the guild
+            muted_role_id = self.bot.settings["moderation-muted-role"]
+            muted_role = nextcord.utils.find(lambda r: r.id == muted_role_id, guild.roles)
+
+            try:
+                member = await guild.fetch_member(member_id)
+                # no error : member is in guild
+
+                # check if member has muted role
+                if muted_role not in member.roles:
+                    try: await member.add_roles(muted_role)
+                    except Exception as e: print(e)
+                
+                # send embed to member
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
+                builder.addMember(member)
+                builder.addAction()
+                builder.addDurationString()
+                builder.addReason()
+                builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+                builder.author = self.bot.user
+                builder.build()
+                embed = builder.embed # get embed
+                if member.dm_channel is None: await member.create_dm() # create dm with member
+                await member.dm_channel.send(embed=embed) # send embed to member
+
+            except:
+                # error : member is not in guild
+                pass
+
+            finally:
+                # Build embed to send in log channels
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
+                builder.addMember(member)
+                builder.addAction()
+                builder.addDurationString()
+                builder.addReason()
+                builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+                builder.author = self.bot.user
+                builder.build()
+                embed = builder.embed # get embed
+                await self.logInfraction(embed) # send embed in log channel
+                
+        elif warn_count == 5:
+            duration_string = "3j"
+            default_infraction.action = "ban"
+            default_infraction.duration_string = duration_string
+            default_infraction. end_timestamp = self.timestampFromDuration(duration_string) + default_infraction.timestamp
+            default_infraction.reason = "Ban automatique 3 jours après 5 warns"
+
+            # add infraction
+            infraction = self.addInfraction(infraction=default_infraction)
+
+            # Build embed to send in log channels
+            builder = InfractionEmbedBuilder(infraction) # define embed builder
+            builder.addMember(member)
+            builder.addAction()
+            builder.addDurationString()
+            builder.addReason()
+            builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+            builder.author = self.bot.user
+            builder.build()
+            embed = builder.embed # get embed
+            await self.logInfraction(embed) # send embed in log channel
+
+            # Build and send embed to member if he is in guild
+            try:
+                member = await guild.fetch_member(member_id)
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
+                builder.addMember(member)
+                builder.addAction()
+                builder.addDurationString()
+                builder.addReason()
+                builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+                builder.author = self.bot.user
+                builder.build()
+                embed = builder.embed # get embed
+                if member.dm_channel is None: await member.create_dm() # create dm with member
+                await member.dm_channel.send(embed=embed) # send embed to member
+            except: pass
+
+            # Ban member
+            await guild.ban(user=member, reason=infraction.reason)
+    
+        elif warn_count == 10:
+            duration_string = "7j"
+            default_infraction.action = "ban"
+            default_infraction.duration_string = duration_string
+            default_infraction. end_timestamp = self.timestampFromDuration(duration_string) + default_infraction.timestamp
+            default_infraction.reason = "Ban automatique 7 jours après 10 warns"
+
+            # add infraction
+            infraction = self.addInfraction(infraction=default_infraction)
+
+            # Build embed to send in log channels
+            builder = InfractionEmbedBuilder(infraction) # define embed builder
+            builder.addMember(member)
+            builder.addAction()
+            builder.addDurationString()
+            builder.addReason()
+            builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+            builder.author = self.bot.user
+            builder.build()
+            embed = builder.embed # get embed
+            await self.logInfraction(embed) # send embed in log channel
+
+            # Build and send embed to member if he is in guild
+            try:
+                member = await guild.fetch_member(member_id)
+                builder = InfractionEmbedBuilder(infraction) # define embed builder
+                builder.addMember(member)
+                builder.addAction()
+                builder.addDurationString()
+                builder.addReason()
+                builder.setColor(self.bot.settings["defaultColors"]["sanction"])
+                builder.author = self.bot.user
+                builder.build()
+                embed = builder.embed # get embed
+                if member.dm_channel is None: await member.create_dm() # create dm with member
+                await member.dm_channel.send(embed=embed) # send embed to member
+            except: pass
+
+            # Ban member
+            await guild.ban(user=member, reason=infraction.reason)
+        
+        else: return # stop function
+        

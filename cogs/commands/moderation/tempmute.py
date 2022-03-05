@@ -1,16 +1,15 @@
 import json
 import locale
 import time
-from discord import Member
 
-import nextcord
 
 from core.helpers import letterToFrenchWord
 from core.decorators import check_permissions
 from core.infractions_manager import Infraction, InfractionEmbedBuilder
-from nextcord import Embed, User
+from nextcord import Embed, User, Member
 from nextcord.ext import commands
 from datetime import datetime
+import nextcord
 
 # Set local time
 locale.setlocale(locale.LC_TIME,'')

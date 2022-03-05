@@ -2,7 +2,7 @@ import json
 import locale
 import time
 
-from discord import Member
+from nextcord import Member
 
 from core.decorators import check_permissions
 from core.infractions_manager import Infraction, InfractionEmbedBuilder

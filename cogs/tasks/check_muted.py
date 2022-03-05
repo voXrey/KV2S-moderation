@@ -37,6 +37,7 @@ class CheckMuted(Cog):
             if muted_role in member.roles:
                 try:
                     await member.remove_roles(muted_role)
+                    # log
                     await self.bot.infractions_manager.logInfraction(
                         Embed(
                             title="Unmute automatique",
@@ -45,6 +46,21 @@ class CheckMuted(Cog):
                         )
                             .set_author(name=self.bot.user, icon_url=self.bot.user.display_avatar.url)
                     )
+                except Exception as e:
+                    print(e)
+
+                # send to member
+                try:
+                    embed=Embed(
+                            title="Unmute automatique",
+                            description=f"Vous avez été unmute automatiquement (Infraction `#{members[member_id]}`)",
+                            color=self.bot.settings["defaultColors"]["cancel"]
+                        )
+                    embed.set_author(name=self.bot.user, icon_url=self.bot.user.display_avatar.url)
+                    
+                    if member.dm_channel is None: await member.create_dm() # create dm
+                    await member.dm_channel.send(embed=embed) # send embed
+
                 except Exception as e:
                     print(e)
 

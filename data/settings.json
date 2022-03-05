@@ -13,7 +13,7 @@
         "moderation-logs": 948192921830690926
     },
     "automoderation": {
-        "warns-for-ban": 3
+        "warns-for-sanction": 3
     },
     "letters-duration": {
         "s": 1,
