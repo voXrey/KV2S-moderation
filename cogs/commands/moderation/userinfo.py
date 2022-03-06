@@ -1,9 +1,10 @@
 import json
 
 from core.decorators import check_permissions
-from nextcord import ButtonStyle, Embed, Member, Interaction
-from nextcord.ext import commands
-from nextcord.ui import Button, View
+from discord import Embed, Member
+from discord.ext import commands
+from dislash import Button, ButtonStyle, ActionRow, ButtonStyle
+from dislash.interactions.message_interaction import MessageInteraction
 
 class UserInfo(commands.Cog):
     command_name = "userinfo"
@@ -66,7 +67,7 @@ class UserInfo(commands.Cog):
         ## Set author (member)
         embed.set_author(
             name=f"{member} ({member.id})",
-            icon_url=member.display_avatar.url
+            icon_url=member.avatar_url
         )
 
         ## Set footer (counts)
@@ -82,10 +83,6 @@ class UserInfo(commands.Cog):
             label="Voir les infractions",
             custom_id="send_infractions"
         )
-        async def infra_callback(interaction:Interaction):
-            """Execute 'infractions' command"""
-            if interaction.user == ctx.author._user: await ctx.invoke(self.bot.get_command('infractions'), member)
-        infra_button.callback = infra_callback
 
         ## create button to send member's id
         id_button = Button(
@@ -93,25 +90,55 @@ class UserInfo(commands.Cog):
             label="id",
             custom_id="send_id"
         )
-        async def id_callback(interaction:Interaction):
-            """Send member's id"""
-            if interaction.user == ctx.author._user: await self.bot.replyOrSend(
-                    message=ctx.message,
-                    content=member.id
-                )
-        id_button.callback = id_callback
 
-        ## create view to stock buttons
-        view = View()
-        view.add_item(infra_button)
-        view.add_item(id_button)
+        ## create row to stock buttons
+        row = ActionRow(
+            infra_button,
+            id_button
+        )
 
-        # Send embed
-        await self.bot.replyOrSend(
+        ## Send embed
+        msg = await self.bot.replyOrSend(
             message=ctx.message,
             embed=embed,
-            view=view
+            components=[row]
         )
+
+        ## add callbacks
+        on_click = msg.create_click_listener(timeout=120) # timeout of 120 seconds
+        @on_click.matching_id("send_infractions")
+        async def on_infra_button(inter:MessageInteraction):
+            """Execute 'infractions' command"""
+            if inter.author._user == ctx.author._user:
+                infra_button.disabled = True
+                row = ActionRow(
+                    infra_button,
+                    id_button
+                )
+                await msg.edit(components=[row])
+                await ctx.invoke(self.bot.get_command('infractions'), member)
+                
+            
+            try: await inter.respond()
+            except: pass
+
+        @on_click.matching_id("send_id")
+        async def on_id_button(inter:MessageInteraction):
+            if inter.author._user == ctx.author._user:
+                id_button.disabled = True
+                row = ActionRow(
+                    infra_button,
+                    id_button
+                )
+                await msg.edit(components=[row])
+                await inter.reply(
+                    content=member.id
+                )
+                
+        @on_click.timeout
+        async def on_timeout():
+            try: await msg.edit(components=[])
+            except: pass
 
 def setup(bot:commands.Bot):
     bot.add_cog(UserInfo(bot))

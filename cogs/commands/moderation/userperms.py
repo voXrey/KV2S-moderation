@@ -1,9 +1,8 @@
 import json
 
 from core.decorators import check_permissions
-from nextcord import ButtonStyle, Embed, Member, Interaction
-from nextcord.ext import commands
-from nextcord.ui import Button, View
+from discord import Embed, Member
+from discord.ext import commands
 
 class UserPerms(commands.Cog):
     command_name = "userperms"
@@ -45,7 +44,7 @@ class UserPerms(commands.Cog):
         # Set author (member)
         embed.set_author(
             name=member,
-            icon_url=member.display_avatar.url
+            icon_url=member.avatar_url
         )
 
         # Send embed

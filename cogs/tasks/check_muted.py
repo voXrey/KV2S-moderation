@@ -1,9 +1,8 @@
 from turtle import color
-from nextcord import Embed
-import nextcord
-from nextcord.ext import tasks
-from nextcord.ext.commands import Bot, Cog
-from core.infractions_manager import InfractionEmbedBuilder
+from discord import Embed
+import discord
+from discord.ext import tasks
+from discord.ext.commands import Bot, Cog
 
 
 class CheckMuted(Cog):
@@ -21,7 +20,7 @@ class CheckMuted(Cog):
     async def check_muted(self):
         guild = await self.bot.fetch_guild(914554436926447636)
         muted_role_id = self.bot.settings["moderation-muted-role"]
-        muted_role = nextcord.utils.find(lambda r: r.id == muted_role_id, guild.roles)
+        muted_role = discord.utils.find(lambda r: r.id == muted_role_id, guild.roles)
         members = self.bot.infractions_manager.membersToUnmute()
         
         for member_id in members:
@@ -44,7 +43,7 @@ class CheckMuted(Cog):
                             description=f"`{member}` a été unmute (Infraction `#{members[member_id]}`)",
                             color=self.bot.settings["defaultColors"]["cancel"]
                         )
-                            .set_author(name=self.bot.user, icon_url=self.bot.user.display_avatar.url)
+                            .set_author(name=self.bot.user, icon_url=self.bot.user.avatar_url)
                     )
                 except Exception as e:
                     print(e)
@@ -56,7 +55,7 @@ class CheckMuted(Cog):
                             description=f"Vous avez été unmute automatiquement (Infraction `#{members[member_id]}`)",
                             color=self.bot.settings["defaultColors"]["cancel"]
                         )
-                    embed.set_author(name=self.bot.user, icon_url=self.bot.user.display_avatar.url)
+                    embed.set_author(name=self.bot.user, icon_url=self.bot.user.avatar_url)
                     
                     if member.dm_channel is None: await member.create_dm() # create dm
                     await member.dm_channel.send(embed=embed) # send embed

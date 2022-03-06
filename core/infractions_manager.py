@@ -1,10 +1,10 @@
 import datetime
 import time
 
-import nextcord
+import discord
 from core.helpers import letterToFrenchWord
-from nextcord import Embed, Member, User
-from nextcord.ext import commands
+from discord import Embed, Member, User
+from discord.ext import commands
 from core.database import Database
 from core.helpers import letterToFrenchWord
 
@@ -88,7 +88,7 @@ class InfractionEmbedBuilder:
         """
         Build embed author
         """
-        if self.author is not None: self.embed.set_author(name=self.author, icon_url=self.author.display_avatar.url)
+        if self.author is not None: self.embed.set_author(name=self.author, icon_url=self.author.avatar_url)
         else: self.embed.set_author(name=f"({self.infraction.moderator_id})")
     
     def buildFooter(self):
@@ -206,13 +206,13 @@ class InfractionsManager:
             # Add member
             if member_id == bot.user.id: # if user is the bot
                 member = bot.user
-                embed.set_author(name=member, icon_url=member.display_avatar.url)
+                embed.set_author(name=member, icon_url=member.avatar_url)
             else:
                 try:
                     member = await bot.fetch_user(member_id)
-                    embed.set_author(name=member, icon_url=member.display_avatar.url)
+                    embed.set_author(name=member, icon_url=member.avatar_url)
                 except:
-                    embed.set_author(name=f"({member_id})", icon_url=bot.user.default_display_avatar.url)
+                    embed.set_author(name=f"({member_id})", icon_url=bot.user.default_avatar_url)
 
             # Add total of infractions
             infractions_actions_count = self.calculInfractions(infractions=infractions)
@@ -431,7 +431,7 @@ class InfractionsManager:
 
             # check if member is in the guild
             muted_role_id = self.bot.settings["moderation-muted-role"]
-            muted_role = nextcord.utils.find(lambda r: r.id == muted_role_id, guild.roles)
+            muted_role = discord.utils.find(lambda r: r.id == muted_role_id, guild.roles)
 
             try:
                 member = await guild.fetch_member(member_id)

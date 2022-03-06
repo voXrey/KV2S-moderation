@@ -1,8 +1,7 @@
 from turtle import color
-from nextcord import Embed
-from nextcord.ext import tasks
-from nextcord.ext.commands import Bot, Cog
-from core.infractions_manager import InfractionEmbedBuilder
+from discord import Embed
+from discord.ext import tasks
+from discord.ext.commands import Bot, Cog
 
 
 class CheckBanned(Cog):
@@ -40,7 +39,7 @@ class CheckBanned(Cog):
                             description=f"`{user}` a été unban (Infraction `#{members[member_id]}`)",
                             color=self.bot.settings["defaultColors"]["cancel"]
                         )
-                            .set_author(name=self.bot.user, icon_url=self.bot.user.display_avatar.url)
+                            .set_author(name=self.bot.user, icon_url=self.bot.user.avatar_url)
                     )
                 except Exception as e:
                     print(e)

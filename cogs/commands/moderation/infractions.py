@@ -1,8 +1,8 @@
 import json
 
-import nextcord
+import discord
 from core.decorators import check_permissions
-from nextcord.ext import commands
+from discord.ext import commands
 
 class Infractions(commands.Cog):
     command_name = "infractions"
@@ -23,7 +23,7 @@ class Infractions(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 1, commands.BucketType.member)
     @check_permissions
-    async def infractions(self, ctx:commands.Context, member:nextcord.User=None):
+    async def infractions(self, ctx:commands.Context, member:discord.User=None):
         # use author as member if member is not given
         if member is None: member = ctx.author
         
@@ -34,10 +34,11 @@ class Infractions(commands.Cog):
         embeds = await self.bot.infractions_manager.createEmbedsWithInfractions(member_id=member.id, infractions=infractions, bot=self.bot)
 
         # Send embeds
-        await self.bot.replyOrSend(
-                message=ctx.message,
-                embeds=embeds
-        )
+        for embed in embeds:
+            await self.bot.replyOrSend(
+                    message=ctx.message,
+                    embed=embed
+            )
 
 def setup(bot:commands.Bot):
     bot.add_cog(Infractions(bot))

@@ -1,19 +1,15 @@
-from json import load
 import json
 from os import listdir
-from os.path import join
-from discord import Member
 
-from nextcord import Embed, Intents, Message, Message, Interaction
-from nextcord.ui import View
-from nextcord.ext import commands
-from nextcord.ext.commands import Bot
+from discord import Embed, Intents, Message
+from discord.ext import commands
+from dislash import ActionRow, InteractionClient, Component
 from core.infractions_manager import InfractionsManager
 
 
 class Bot(commands.Bot):
     def __init__(self, description=None, **options):
-        #self.remove_command('help') # remove default help command to add personal help command with cogs
+        self.inter_client = None
         self.config = self.getConfig() # set bot config
         self.settings = self.getSettings() # set bot settings
         self.commands_doc = self.getCommands() # set commands doc
@@ -25,35 +21,33 @@ class Bot(commands.Bot):
 
         super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options) # init commands.Bot
 
-    async def replyOrSend(self, message:Message, content:str=None, embed:Embed=None, embeds:list[Embed]=None, view:View=None):
+    async def replyOrSend(self, message:Message, content:str=None, embed:Embed=None, components:list[Component]=None):
         """
         Try to reply to message, if an error is occured, try to send a message in the message's channels
         
         Parameters:
         message (Message): message to reply
         content (str): message content to send
-        embeds (list[Embed]): message embeds to send
-        view (View): message's view
+        action_row (ActionRow): message's action row
         
         Returns:
         Message: message sent
         """
+        msg = None
         try: # try to reply
             msg = await message.reply(
                 content=content,
                 embed=embed,
-                embeds=embeds,
-                view=view
+                components=components
             )
         except: # if reply didn't worked
             try: # try to send message in the message's channel
                 msg = await message.channel.send(
                     content=content,
                     embed=embed,
-                    embeds=embeds,
-                    view=view
+                    components=components
                 )
-            except: return
+            except Exception as e: print(e)
         return msg
 
     def getJsonData(self, filepath:str) -> dict:
@@ -114,21 +108,22 @@ class Bot(commands.Bot):
             else: data[setting] = new_data
             json.dump(data, settings, indent=4)
 
-    def load_commands(self) -> None:
+    def load_commands(self, command_type:str) -> None:
         """
         Load normal or slash commands
         """
-        for command_categorie in listdir(f"./cogs/commands"): # for each commands categorie
-            for file in listdir(f"./cogs/commands/{command_categorie}"): # for each file in command categorie
-                # check if file is a python file
-                if file.endswith(".py"):
-                    extension = file[:-3]
-                    try: # try to load extension/command
-                        self.load_extension(f"cogs.commands.{command_categorie}.{extension}")
-                        print(f"Loaded command '{extension}'")
-                    except Exception as e:
-                        exception = f"{type(e).__name__}: {e}"
-                        print(f"Failed to load command {extension}\n{exception}")
+        if command_type in ["commands", "slash_commands"]:
+            for command_categorie in listdir(f"./cogs/{command_type}"): # for each commands categorie
+                for file in listdir(f"./cogs/{command_type}/{command_categorie}"): # for each file in command categorie
+                    # check if file is a python file
+                    if file.endswith(".py"):
+                        extension = file[:-3]
+                        try: # try to load extension/command
+                            self.load_extension(f"cogs.{command_type}.{command_categorie}.{extension}")
+                            print(f"Loaded {command_type} '{extension}'")
+                        except Exception as e:
+                            exception = f"{type(e).__name__}: {e}"
+                            print(f"Failed to load {command_type} {extension}\n{exception}")
     
     def load_tasks(self) -> None:
         """
@@ -154,7 +149,8 @@ class Bot(commands.Bot):
         for channel_name,channel_id in self.settings['channels'].items():
             if channel_id is not None: self.mychannels[channel_name] = await self.fetch_channel(channel_id)
 
-        self.load_commands() # load commands
+        self.load_commands("commands") # load commands
+        self.load_commands("slash_commands") # load slash commands
         self.load_tasks() # load tasks
 
         print(f"Logged in as {bot.user}")
@@ -167,18 +163,11 @@ class Bot(commands.Bot):
         """
         if message.author == self.user or message.author.bot: return
         await self.process_commands(message)
-    
-    """async def on_interaction(self, interaction:nextcord.Interaction):
-        if interaction.type == nextcord.InteractionType.application_command:
-            await self.process_application_commands(interaction)"""
-
-
+ 
 
 if __name__ == "__main__":
     bot = Bot() # create bot
-
-    @bot.slash_command(name="help", description="Help slash command !", guild_ids=[914554436926447636])
-    async def pingtest(interaction:Interaction, *, text=None):
-        await interaction.send(text)
+    inter_client = InteractionClient(bot)
+    bot.inter_client = inter_client
 
     bot.run(bot.config["TOKEN"]) # run bot with the token in bot config

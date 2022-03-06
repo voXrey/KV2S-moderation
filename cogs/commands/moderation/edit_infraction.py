@@ -2,9 +2,10 @@ import json
 
 from core.decorators import check_permissions
 from core.infractions_manager import InfractionEmbedBuilder
-from nextcord import Embed, ButtonStyle, Interaction
-from nextcord.ui import View, Button
-from nextcord.ext import commands
+from discord import Embed
+from discord.ext import commands
+from dislash import Button, ButtonStyle, ActionRow
+from dislash.interactions.message_interaction import MessageInteraction
 
 class EditInfraction(commands.Cog):
     command_name = "edit-infraction"
@@ -59,9 +60,51 @@ class EditInfraction(commands.Cog):
                 label="oui",
                 custom_id="edit_infraction"
             )
-            async def yes_callback(interaction:Interaction):
+            
+            ### create no button
+            no_button = Button(
+                style=ButtonStyle.red,
+                label="non",
+                custom_id="no_edit_infraction"
+            )
+           
+            ## create row to stock buttons
+            row = ActionRow(
+                yes_button,
+                no_button
+            )
+
+            ## send embed
+            confirmation_message = await self.bot.replyOrSend(
+                message=ctx.message,
+                content="Êtes-vous sûr de vouloir modifier cette infraction ?",
+                embed = embed,
+                components=[row]
+            )
+
+            ## add callbacks
+            on_click = confirmation_message.create_click_listener(timeout=120)
+
+            @on_click.matching_id("no_edit_infraction")
+            async def on_no_edit_infra(interaction:MessageInteraction):
+                """No edit infraction"""
+                if interaction.author._user == ctx.author._user:
+                    try: await interaction.message.delete() # delete first message
+                    except: pass
+                    msg = await self.bot.replyOrSend(
+                        message=ctx.message,
+                        embed=Embed(
+                        description=f"L'infraction `#{infraction_id}` n'a pas été modifié",
+                        color=self.bot.settings["defaultColors"]["cancel"]
+                        )
+                    )
+                    try: await msg.delete(delay=3) # delete msg after 3 seconds
+                    except: pass
+
+            @on_click.matching_id("edit_infraction")
+            async def on_edit_infra(interaction:MessageInteraction):
                 """Edit infraction"""
-                if interaction.user == ctx.author._user:
+                if interaction.author._user == ctx.author._user:
                     try: await interaction.message.delete() # delete first message
                     except: pass
                     infraction.reason = infraction_reason
@@ -75,47 +118,9 @@ class EditInfraction(commands.Cog):
                     )
                     try: await msg.delete(delay=3) # delete msg after 3 seconds
                     except: pass
-            yes_button.callback = yes_callback
-
-            ### create no button
-            no_button = Button(
-                style=ButtonStyle.red,
-                label="non",
-                custom_id="no_edit_infraction"
-            )
-            async def no_callback(interaction:Interaction):
-                """No edit infraction"""
-                if interaction.user == ctx.author._user:
-                    try: await interaction.message.delete() # delete first message
-                    except: pass
-                    msg = await self.bot.replyOrSend(
-                        message=ctx.message,
-                        embed=Embed(
-                        description=f"L'infraction `#{infraction_id}` n'a pas été supprimée",
-                        color=self.bot.settings["defaultColors"]["cancel"]
-                        )
-                    )
-                    try: await msg.delete(delay=3) # delete msg after 3 seconds
-                    except: pass
-            no_button.callback = no_callback
-
-            ## create view to stock buttons
-            view = View(timeout=120)
-            view.add_item(yes_button)
-            view.add_item(no_button)
-
-            ## send embed
-            confirmation_message = await self.bot.replyOrSend(
-                message=ctx.message,
-                content="Êtes-vous sûr de vouloir modifier cette infraction ?",
-                embed = embed,
-                view=view
-            )
 
             # Delete messages
             try: await ctx.message.delete() # delete command
-            except: pass
-            try: await confirmation_message.delete(delay=120) # delete after 120 seconds (after message's view timeout)
             except: pass
 
 

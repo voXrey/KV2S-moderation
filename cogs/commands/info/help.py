@@ -1,8 +1,8 @@
 import json
 
 from core.decorators import check_permissions
-from nextcord import Embed
-from nextcord.ext import commands
+from discord import Embed
+from discord.ext import commands
 
 
 class Help(commands.Cog):

@@ -7,8 +7,8 @@ def check_permissions(func):
         Decorator to check if member has all permissions required to execute a command
         
         Parameters:
-        cog (nextcord.ext.commands.Cog) : cog of the command
-        ctx (nextcord.Context) : command's context
+        cog (discord.ext.commands.Cog) : cog of the command
+        ctx (discord.Context) : command's context
         """
         member_permissions = ctx.author.guild_permissions # get member's permissions
         member_permissions_strings = [permission[0] for permission in member_permissions if permission[1]] # get permissions name if member has this permission

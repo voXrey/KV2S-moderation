@@ -2,12 +2,12 @@ import json
 import locale
 import time
 
-import nextcord
+import discord
 
 from core.decorators import check_permissions
 from core.infractions_manager import Infraction, InfractionEmbedBuilder
-from nextcord import Embed, User
-from nextcord.ext import commands
+from discord import Embed, User
+from discord.ext import commands
 
 # Set local time
 locale.setlocale(locale.LC_TIME,'')
@@ -53,7 +53,7 @@ class Warn(commands.Cog):
 
         # check if member is muted
         muted_role_id = self.bot.settings["moderation-muted-role"]
-        muted_role = nextcord.utils.find(lambda r: r.id == muted_role_id, ctx.guild.roles)
+        muted_role = discord.utils.find(lambda r: r.id == muted_role_id, ctx.guild.roles)
         if muted_role in member_.roles:
             await self.bot.replyOrSend(
                 message=ctx.message,

@@ -1,6 +1,6 @@
 import json
 
-from nextcord.ext import commands
+from discord.ext import commands
 
 from core.decorators import check_permissions
 from core.infractions_manager import InfractionEmbedBuilder

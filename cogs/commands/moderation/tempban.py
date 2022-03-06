@@ -5,9 +5,8 @@ import time
 from core.helpers import letterToFrenchWord
 from core.decorators import check_permissions
 from core.infractions_manager import Infraction, InfractionEmbedBuilder
-from nextcord import Embed, User
-from nextcord.ext import commands
-from datetime import datetime
+from discord import Embed, User
+from discord.ext import commands
 
 # Set local time
 locale.setlocale(locale.LC_TIME,'')
