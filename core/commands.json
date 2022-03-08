@@ -57,7 +57,7 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez expulser",
-                    "type": 9,
+                    "type": 6,
                     "required": true
                 },
                 {
@@ -103,8 +103,8 @@
                     "required": true
                 },
                 {
-                    "name": "durée",
-                    "description": "Durée du mute\n`s` : secondes\n`m` : minutes\n`h` : heures\n`j` et `d` : jours\n`M` : mois\n`a` et `y` : années",
+                    "name": "duree",
+                    "description": "Durée du mute\n`s`: secondes\n`m`: minutes\n`h`: heures\n`j` / `d`: jours\n`M`: mois\n`a` / `y`: années",
                     "type": 3,
                     "required": true
                 },
@@ -172,8 +172,8 @@
                     "required": true
                 },
                 {
-                    "name": "durée",
-                    "description": "Durée du bannissment\n`s` : secondes\n`m` : minutes\n`h` : heures\n`j` et `d` : jours\n`M` : mois\n`a` et `y` : années",
+                    "name": "duree",
+                    "description": "Durée du bannissment\n`s`: secondes\n`m`: minutes\n`h`: heures\n`j` / `d`: jours\n`M`: mois\n`a` / `y`: années",
                     "type": 3,
                     "required": true
                 },
@@ -246,7 +246,7 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez ses informations (vous si membre n'est pas donné)",
-                    "type": 9,
+                    "type": 6,
                     "required": false
                 }
             ]
@@ -261,7 +261,7 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez voir les permissions (vous si membre n'est pas donné)",
-                    "type": 9,
+                    "type": 6,
                     "required": false
                 }
             ]

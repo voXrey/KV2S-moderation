@@ -440,7 +440,7 @@ class InfractionsManager:
                 # check if member has muted role
                 if muted_role not in member.roles:
                     try: await member.add_roles(muted_role)
-                    except Exception as e: print(e)
+                    except: pass
                 
                 # send embed to member
                 builder = InfractionEmbedBuilder(infraction) # define embed builder
@@ -511,7 +511,8 @@ class InfractionsManager:
             except: pass
 
             # Ban member
-            await guild.ban(user=member, reason=infraction.reason)
+            try: await guild.ban(user=member, reason=infraction.reason)
+            except: pass
     
         elif warn_count == 10:
             duration_string = "7j"
@@ -552,7 +553,8 @@ class InfractionsManager:
             except: pass
 
             # Ban member
-            await guild.ban(user=member, reason=infraction.reason)
+            try: await guild.ban(user=member, reason=infraction.reason)
+            except: pass
         
         else: return # stop function
         

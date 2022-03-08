@@ -1,12 +1,13 @@
 import json
 
+from core.decorators import check_slash_permissions
 from discord import Embed, Member
 from discord.ext import commands
 from dislash import (Option, SlashInteraction, cooldown, guild_only,
                      slash_command)
 
 
-class UserPerms(commands.Cog):
+class SlashUserPerms(commands.Cog):
     command_name = "userperms"
     
     # Get commands.json 
@@ -32,6 +33,7 @@ class UserPerms(commands.Cog):
     )
     @guild_only()
     @cooldown(1, 1, commands.BucketType.member)
+    @check_slash_permissions
     async def userperms(self, inter:SlashInteraction, membre:Member=None):
         # Use author if member is not given
         if membre is None: member = inter.guild.get_member(inter.author.id)
@@ -61,4 +63,4 @@ class UserPerms(commands.Cog):
         await inter.create_response(embed=embed)
 
 def setup(bot:commands.Bot):
-    bot.add_cog(UserPerms(bot))
+    bot.add_cog(SlashUserPerms(bot))

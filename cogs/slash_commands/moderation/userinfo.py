@@ -1,5 +1,6 @@
 import json
 
+from core.decorators import check_slash_permissions
 from discord import Embed, Member
 from discord.ext import commands
 from dislash import (ActionRow, Button, ButtonStyle, Option, SlashInteraction,
@@ -7,7 +8,7 @@ from dislash import (ActionRow, Button, ButtonStyle, Option, SlashInteraction,
 from dislash.interactions.message_interaction import MessageInteraction
 
 
-class UserInfo(commands.Cog):
+class SlashUserInfo(commands.Cog):
     command_name = "userinfo"
     
     # Get commands.json 
@@ -33,6 +34,7 @@ class UserInfo(commands.Cog):
     )
     @guild_only()
     @cooldown(1, 1, commands.BucketType.member)
+    @check_slash_permissions
     async def userinfo(self, inter:SlashInteraction, membre:Member=None):
         # Use author if member is not given
         if membre is None: member = inter.guild.get_member(inter.author.id)
@@ -153,4 +155,4 @@ class UserInfo(commands.Cog):
             except: pass
 
 def setup(bot:commands.Bot):
-    bot.add_cog(UserInfo(bot))
+    bot.add_cog(SlashUserInfo(bot))

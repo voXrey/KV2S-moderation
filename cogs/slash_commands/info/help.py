@@ -1,5 +1,6 @@
 import json
 
+from core.decorators import check_slash_permissions
 from discord import Embed
 from discord.ext import commands
 from dislash import (Option, SlashInteraction, cooldown, guild_only,
@@ -32,6 +33,7 @@ class SlashHelp(commands.Cog):
     )
     @guild_only()
     @cooldown(1, 1, commands.BucketType.member)
+    @check_slash_permissions
     async def help(self, inter:SlashInteraction, commande:str=None):
         # If general help page (commands list) is asked by user
         if commande is None:

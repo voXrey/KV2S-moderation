@@ -1,5 +1,6 @@
 import json
 
+from core.decorators import check_slash_permissions
 from core.infractions_manager import InfractionEmbedBuilder
 from discord import Embed
 from discord.ext import commands
@@ -7,7 +8,7 @@ from dislash import (Option, SlashInteraction, cooldown, guild_only,
                      slash_command)
 
 
-class Infraction(commands.Cog):
+class SlashInfraction(commands.Cog):
     command_name = "infraction"
 
     # Get commands.json 
@@ -33,6 +34,7 @@ class Infraction(commands.Cog):
     )
     @guild_only()
     @cooldown(1, 1, commands.BucketType.member)
+    @check_slash_permissions
     async def infraction(self, inter:SlashInteraction, infraction:int):
         infraction_id = infraction # change var name (because of slash command argument)
 
@@ -64,4 +66,4 @@ class Infraction(commands.Cog):
             await inter.create_response(embed=embed)
 
 def setup(bot:commands.Bot):
-    bot.add_cog(Infraction(bot))
+    bot.add_cog(SlashInfraction(bot))
