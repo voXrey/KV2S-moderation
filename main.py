@@ -3,16 +3,16 @@ from os import listdir
 
 from discord import Embed, Intents, Message
 from discord.ext import commands
-from dislash import ActionRow, InteractionClient, Component
+from dislash import  InteractionClient, Component
 from core.infractions_manager import InfractionsManager
 
 
 class Bot(commands.Bot):
     def __init__(self, description=None, **options):
-        self.inter_client = None
         self.config = self.getConfig() # set bot config
         self.settings = self.getSettings() # set bot settings
         self.commands_doc = self.getCommands() # set commands doc
+
         self.infractions_manager = InfractionsManager(bot=self) # set infraction manager
 
         self.prefix = self.config["PREFIX"]
@@ -20,6 +20,13 @@ class Bot(commands.Bot):
         intents = Intents.all() # set bot intents (all)
 
         super().__init__(command_prefix=command_prefix, help_command=None, intents=intents, description=description, **options) # init commands.Bot
+        
+        self.load_commands("commands") # load commands
+        self.load_commands("slash_commands") # load slash commands
+        self.load_tasks() # load tasks
+        
+        self.inter_client = InteractionClient(self) # create inter client to use dislash features
+
 
     async def replyOrSend(self, message:Message, content:str=None, embed:Embed=None, components:list[Component]=None):
         """
@@ -149,10 +156,6 @@ class Bot(commands.Bot):
         for channel_name,channel_id in self.settings['channels'].items():
             if channel_id is not None: self.mychannels[channel_name] = await self.fetch_channel(channel_id)
 
-        self.load_commands("commands") # load commands
-        self.load_commands("slash_commands") # load slash commands
-        self.load_tasks() # load tasks
-
         print(f"Logged in as {bot.user}")
         print("-------------------")
 
@@ -167,7 +170,5 @@ class Bot(commands.Bot):
 
 if __name__ == "__main__":
     bot = Bot() # create bot
-    inter_client = InteractionClient(bot)
-    bot.inter_client = inter_client
 
     bot.run(bot.config["TOKEN"]) # run bot with the token in bot config

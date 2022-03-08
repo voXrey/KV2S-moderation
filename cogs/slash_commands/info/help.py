@@ -1,31 +1,40 @@
 import json
 
-from core.decorators import check_permissions
 from discord import Embed
 from discord.ext import commands
+from dislash import (Option, SlashInteraction, cooldown, guild_only,
+                     slash_command)
 
 
-class Help(commands.Cog):
+class SlashHelp(commands.Cog):
     command_name = "help"
     
     # Get commands.json 
     with open("core/commands.json", "r") as commands_json:
         command_info = json.load(commands_json)["commands"][command_name]
 
+    options = []
+    for arg in command_info["args"]:
+        options.append(Option(
+            name=arg["name"],
+            description=arg["description"],
+            type=arg["type"],
+            required=arg["required"]
+        ))
+
     def __init__(self, bot:commands.Bot):
         self.bot = bot
 
-    @commands.command(name = command_name,
-                    usage=command_info['usage'],
-                    aliases=command_info['aliases'],
-                    description=command_info['description']
+    @slash_command(name=command_info['usage'],
+                    description=command_info['description'],
+                    options=options,
+                    guild_ids=[914554436926447636] # TODO: Delete guild_ids
     )
-    @commands.guild_only()
-    @commands.cooldown(1, 1, commands.BucketType.member)
-    @check_permissions
-    async def help(self, ctx:commands.Context, command_name:str=None):
+    @guild_only()
+    @cooldown(1, 1, commands.BucketType.member)
+    async def help(self, inter:SlashInteraction, commande:str=None):
         # If general help page (commands list) is asked by user
-        if command_name is None:
+        if commande is None:
             # Create embed
             embed = Embed(
                 title='Commandes',
@@ -44,22 +53,21 @@ class Help(commands.Cog):
                 embed.add_field(name=categorie_info["name"], value=value, inline=False) # add field to embed
 
             # Send embed
-            await self.bot.replyOrSend(message=ctx.message, embed=embed)
+            await inter.create_response(embed=embed)
 
         # If user asked help for a specific command
         else:
             # If command requested no exist
-            if command_name not in self.bot.commands_doc["commands"]:
-                try: await ctx.reply(f"La commande `{command_name}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
-                except: await ctx.send(f"La commande `{command_name}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
+            if commande not in self.bot.commands_doc["commands"]:
+                await inter.respond(content=f"La commande `{commande}` n'existe pas :(\nUtilisez la commande `help` pour obtenir la liste des commandes disponibles")
             # If command requested exists
             else:
                 # Define command's info
-                command = self.bot.commands_doc["commands"][command_name]
+                command = self.bot.commands_doc["commands"][commande]
 
                 # Create embed
                 embed = Embed(
-                    title=f"Commande {command_name}",
+                    title=f"Commande {commande}",
                     color=self.bot.settings["defaultColors"]["neutral"]
                 )
 
@@ -90,8 +98,8 @@ class Help(commands.Cog):
                 embed.set_footer(text="<argument requis> [argument falcultatif]")
 
                 # Send embed
-                await self.bot.replyOrSend(message=ctx.message, embed=embed)
+                await inter.create_response(embed=embed)
 
 
 def setup(bot:commands.Bot):
-    bot.add_cog(Help(bot))
+    bot.add_cog(SlashHelp(bot))

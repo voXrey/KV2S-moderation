@@ -21,7 +21,8 @@
                 {
                     "name": "commande",
                     "description": "Nom de la commande dont vous avez besoin d'aide",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -35,12 +36,14 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez avertir",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison de l'avertissement",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -54,12 +57,14 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez expulser",
-                    "required": 1
+                    "type": 9,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison de l'expulsion",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -73,12 +78,14 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez mute",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison du mute",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -92,17 +99,20 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez tempmute",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "durée",
                     "description": "Durée du mute\n`s` : secondes\n`m` : minutes\n`h` : heures\n`j` et `d` : jours\n`M` : mois\n`a` et `y` : années",
-                    "required": 1
+                    "type": 3,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison du tempmute",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -116,12 +126,14 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez annuler le mute",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison de l'unmute",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -135,12 +147,14 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez bannir",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison du ban",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -154,17 +168,20 @@
                 {
                     "name": "membre",
                     "description": "Membre que vous souhaitez bannir",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "durée",
                     "description": "Durée du bannissment\n`s` : secondes\n`m` : minutes\n`h` : heures\n`j` et `d` : jours\n`M` : mois\n`a` et `y` : années",
-                    "required": 1
+                    "type": 3,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison du ban",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -178,12 +195,14 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez annuler le bannissment",
-                    "required": 1
+                    "type": 6,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "Raison de l'unban",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         },
@@ -197,7 +216,8 @@
                 {
                     "name": "infraction",
                     "description": "Identifiant/numéro de l'infraction",
-                    "required": 1
+                    "type": 4,
+                    "required": true
                 }
             ]
         },
@@ -211,7 +231,8 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez ses infractions (vous si membre n'est pas donné)",
-                    "required": 0
+                    "type": 6,
+                    "required": false
                 }
             ]
         },
@@ -225,7 +246,8 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez ses informations (vous si membre n'est pas donné)",
-                    "required": 0
+                    "type": 9,
+                    "required": false
                 }
             ]
         },
@@ -239,7 +261,8 @@
                 {
                     "name": "membre",
                     "description": "Membre dont vous souhaitez voir les permissions (vous si membre n'est pas donné)",
-                    "required": 0
+                    "type": 9,
+                    "required": false
                 }
             ]
         },
@@ -253,7 +276,8 @@
                 {
                     "name": "infraction",
                     "description": "L'infraction que vous souhaitez supprimer",
-                    "required": 1
+                    "type": 4,
+                    "required": true
                 }
             ]
         },
@@ -267,12 +291,14 @@
                 {
                     "name": "infraction",
                     "description": "L'infraction que vous souhaitez modifier",
-                    "required": 1
+                    "type": 4,
+                    "required": true
                 },
                 {
                     "name": "raison",
                     "description": "La nouvelle raison de l'infraction",
-                    "required": 0
+                    "type": 3,
+                    "required": false
                 }
             ]
         }
