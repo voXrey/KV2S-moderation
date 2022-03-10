@@ -1,1 +1,2 @@
-nextcord==2.0.0a8
+discord.py==1.7.3
+dislash.py==1.4.9

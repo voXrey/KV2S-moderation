@@ -1,0 +1,36 @@
+{
+    "guild_id": 914554436926447636,
+    "defaultColors": {
+        "userinfo": 65535,
+        "sanction": 16711680,
+        "cancel": 16711680,
+        "automoderation": 16744448,
+        "neutral": 33023,
+        "confirmation": 65280,
+        "error": 16711680
+    } ,
+    "channels": {
+        "moderation-logs": 948192921830690926
+    },
+    "automoderation": {
+        "warns-for-sanction": 3
+    },
+    "letters-duration": {
+        "s": 1,
+        "S": 1,
+        "m": 60,
+        "h": 3600,
+        "H": 3600,
+        "j": 86400,
+        "d": 86400,
+        "J": 86400,
+        "D": 86400,
+        "M": 2592000,
+        "a": 31536000,
+        "A": 31536000,
+        "y": 31536000,
+        "Y": 31536000
+    },
+    "moderation-update-time": 1,
+    "moderation-muted-role": 948604823970926603
+}
