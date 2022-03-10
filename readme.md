@@ -1,9 +1,9 @@
 # KV2S-Moderation
-## Moderation
-### Permissions required to use commands
-* warn -> kick members
-* kick -> kick members
-* infraction -> kick members
-* infractions -> kick members
-* edit-infraction -> kick members
-* remove-infraction -> kick members
+## Install
+* Download files
+* Insert a config.json file like :
+`{
+  "TOKEN": "INSERT_YOUR_TOKEN",
+  "PREFIX": "INSERT_YOUR_PREFIX"
+}`
+* Start main.py files
